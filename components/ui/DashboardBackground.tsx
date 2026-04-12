@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
 import type { Engine } from "tsparticles-engine";
@@ -21,99 +21,90 @@ export function DashboardBackground() {
         await loadSlim(engine);
     }, []);
 
-    const getThemeConfig = () => {
+    const config = useMemo(() => {
         switch (theme) {
             case 'ocean':
                 return {
-                    color: "#0ea5e9", // Sky blue
+                    color: "#0ea5e9",
                     shape: "triangle",
-                    moveSpeed: 0.8,
-                    linksOpacity: 0.2,
-                    hoverMode: "repulse",
+                    moveSpeed: 0.5,
+                    linksOpacity: 0.15,
                     glowClass: "bg-[#0ea5e9]/5",
                 };
             case 'matrix':
                 return {
-                    color: "#22c55e", // Green
-                    shape: "edge", // Square-ish
-                    moveSpeed: 1,
-                    linksOpacity: 0.05, // Almost invisible links
-                    hoverMode: "grab",
+                    color: "#22c55e",
+                    shape: "edge",
+                    moveSpeed: 0.6,
+                    linksOpacity: 0.05,
                     glowClass: "bg-[#22c55e]/5",
                     direction: "bottom",
                 };
             case 'cosmic':
                 return {
-                    color: "#d946ef", // Fuchsia
+                    color: "#d946ef",
                     shape: "star",
-                    moveSpeed: 0.3, // Slow float
-                    linksOpacity: 0.15,
-                    hoverMode: "bubble",
+                    moveSpeed: 0.2,
+                    linksOpacity: 0.1,
                     glowClass: "bg-[#d946ef]/5",
                 };
             case 'neon':
             default:
                 return {
-                    color: "#f97316", // Orange
+                    color: "#f97316",
                     shape: "circle",
-                    moveSpeed: 0.5,
-                    linksOpacity: 0.15,
-                    hoverMode: "grab",
+                    moveSpeed: 0.3,
+                    linksOpacity: 0.1,
                     glowClass: "bg-[#f97316]/5",
                 };
         }
-    };
+    }, [theme]);
 
-    const config = getThemeConfig();
+    const particlesOptions = useMemo(() => ({
+        fullScreen: { enable: false, zIndex: -10 },
+        background: { color: { value: "transparent" } },
+        fpsLimit: 30,
+        interactivity: {
+            detectsOn: "window" as const,
+            events: {
+                onHover: { enable: false },
+            },
+        },
+        particles: {
+            color: { value: config.color },
+            links: {
+                color: config.color,
+                distance: 150,
+                enable: true,
+                opacity: config.linksOpacity,
+                width: 1,
+            },
+            move: {
+                enable: true,
+                random: true,
+                speed: config.moveSpeed,
+                straight: false,
+                direction: (config as any).direction || "none",
+            },
+            number: { density: { enable: true, area: 1200 }, value: 20 },
+            opacity: { value: 0.2 },
+            shape: { type: config.shape },
+            size: { value: { min: 1, max: 3 } },
+        },
+        detectRetina: true,
+    }), [config]);
 
     return (
         <div className="fixed inset-0 z-[-10] pointer-events-none">
             <Particles
-                id={`dashboard-tsparticles-${theme}`} // Unique ID so it re-renders cleanly
+                id={`dashboard-tsparticles-${theme}`}
                 init={particlesInit}
-                options={{
-                    fullScreen: { enable: false, zIndex: -10 },
-                    background: { color: { value: "transparent" } },
-                    fpsLimit: 60,
-                    interactivity: {
-                        detectsOn: "window",
-                        events: {
-                            onHover: { enable: true, mode: config.hoverMode },
-                        },
-                        modes: {
-                            grab: { distance: 150, links: { opacity: 0.3 } },
-                            repulse: { distance: 100, duration: 0.4 },
-                            bubble: { distance: 200, size: 6, duration: 2, opacity: 0.8 },
-                        },
-                    },
-                    particles: {
-                        color: { value: config.color },
-                        links: {
-                            color: config.color,
-                            distance: 150,
-                            enable: true,
-                            opacity: config.linksOpacity,
-                            width: 1,
-                        },
-                        move: {
-                            enable: true,
-                            random: true,
-                            speed: config.moveSpeed,
-                            straight: false,
-                            direction: (config as any).direction || "none",
-                        },
-                        number: { density: { enable: true, area: 1000 }, value: 40 },
-                        opacity: { value: 0.3 },
-                        shape: { type: config.shape },
-                        size: { value: { min: 1, max: 3 } },
-                    },
-                    detectRetina: true,
-                }}
+                options={particlesOptions}
                 className="absolute inset-0 w-full h-full transition-opacity duration-1000"
             />
             {/* Very faint background ambient glow matching the theme */}
-            <div className={`fixed top-[-10%] left-[-10%] w-[50%] h-[50%] ${config.glowClass} rounded-full blur-[120px] pointer-events-none transition-colors duration-1000`} />
-            <div className={`fixed bottom-[-10%] right-[-10%] w-[40%] h-[60%] ${config.glowClass} rounded-full blur-[100px] pointer-events-none transition-colors duration-1000 delay-500`} />
+            <div className={`fixed top-[-10%] left-[-10%] w-[50%] h-[50%] ${config.glowClass} rounded-full blur-[80px] pointer-events-none transition-colors duration-1000`} />
+            <div className={`fixed bottom-[-10%] right-[-10%] w-[40%] h-[60%] ${config.glowClass} rounded-full blur-[60px] pointer-events-none transition-colors duration-1000 delay-500`} />
         </div>
     );
 }

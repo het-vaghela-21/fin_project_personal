@@ -44,22 +44,24 @@ async function syncToMongo(payload: {
 
 // ── helper: record login event ─────────────────────────────────────────────
 async function recordLoginEvent(uid: string) {
+    // Fire-and-forget: don't block auth flow for login event recording
     try {
         // Get device string
         const device = navigator.userAgent.split(")")[0].replace("(", "").trim() || "Unknown";
-        // Get IP from a free service
-        let ip = "Unknown";
-        try {
-            const r = await fetch("https://api.ipify.org?format=json");
-            const d = await r.json();
-            ip = d.ip || "Unknown";
-        } catch { /* ignore */ }
 
-        await fetch("/api/users/login-event", {
+        // Get IP in the background — don't let it block
+        const ipPromise = fetch("https://api.ipify.org?format=json")
+            .then(r => r.json())
+            .then(d => d.ip || "Unknown")
+            .catch(() => "Unknown");
+
+        const ip = await ipPromise;
+
+        fetch("/api/users/login-event", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ uid, ip, device }),
-        });
+        }).catch(() => { /* ignore */ });
     } catch (e) {
         console.warn("[recordLoginEvent] failed:", e);
     }

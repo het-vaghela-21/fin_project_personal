@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { TrendingUp, TrendingDown, Activity } from "lucide-react";
 
 const STOCKS = [
@@ -10,9 +11,9 @@ const STOCKS = [
     { symbol: "META", name: "Meta Platforms", price: 485.50, change: "-1.1%", isHigh: false },
 ];
 
-export function LiveStocksWidget() {
+export const LiveStocksWidget = memo(function LiveStocksWidget() {
     return (
-        <div className="glass-panel p-6 rounded-3xl border border-white/5 bg-black/40 backdrop-blur-xl">
+        <div className="glass-panel p-6 rounded-3xl border border-white/5 bg-black/40 backdrop-blur-sm">
             <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                 <Activity className="w-5 h-5 text-primary" /> Live Stocks
             </h2>
@@ -40,4 +41,4 @@ export function LiveStocksWidget() {
             </div>
         </div>
     );
-}
+});

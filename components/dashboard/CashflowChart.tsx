@@ -37,7 +37,7 @@ export function CashflowChart() {
     }, [transactions]);
 
     return (
-        <div className="glass-panel p-6 rounded-3xl border border-white/5 bg-black/40 backdrop-blur-xl h-[400px] flex flex-col">
+        <div className="glass-panel p-6 rounded-3xl border border-white/5 bg-black/40 backdrop-blur-sm h-[400px] flex flex-col">
             <h2 className="text-xl font-bold text-white mb-6">Cashflow Overview</h2>
             <div className="flex-1 w-full min-h-0">
                 <ResponsiveContainer width="100%" height="100%">

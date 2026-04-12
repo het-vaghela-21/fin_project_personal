@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -8,6 +8,7 @@ import {
     BarChart3,
     ReceiptText,
     Bot,
+    Newspaper,
     LogOut,
     ChevronLeft,
     ChevronRight,
@@ -22,9 +23,10 @@ const sidebarNavItems = [
     { title: "Charts", href: "/dashboard/charts", icon: BarChart3 },
     { title: "Transactions", href: "/dashboard/transactions", icon: ReceiptText },
     { title: "AI Suggestions", href: "/dashboard/ai-suggestions", icon: Bot },
+    { title: "Newsletter", href: "/dashboard/newsletter", icon: Newspaper },
 ];
 
-export function DashboardSidebar() {
+export const DashboardSidebar = memo(function DashboardSidebar() {
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const { user, userRole, logout } = useAuth();
@@ -32,7 +34,7 @@ export function DashboardSidebar() {
     return (
         <aside
             className={cn(
-                "sticky top-0 left-0 z-40 h-screen transition-all duration-300 ease-in-out border-r border-white/5 bg-black/40 backdrop-blur-xl flex flex-col flex-shrink-0",
+                "sticky top-0 left-0 z-40 h-screen transition-all duration-300 ease-in-out border-r border-white/5 bg-black/40 backdrop-blur-sm flex flex-col flex-shrink-0",
                 isCollapsed ? "w-[80px]" : "w-[260px]"
             )}
         >
@@ -47,8 +49,8 @@ export function DashboardSidebar() {
                 )}
             </div>
 
-            <div className="flex-1 py-8 px-4 space-y-2 overflow-y-auto">
-                <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-4 px-2">Menu</div>
+            <div className="flex-1 py-4 px-4 space-y-1.5 overflow-y-auto">
+                <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 px-2">Menu</div>
                 {sidebarNavItems.map((item) => {
                     const isActive = pathname === item.href;
                     return (
@@ -56,7 +58,7 @@ export function DashboardSidebar() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all group relative",
+                                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all group relative",
                                 isActive
                                     ? "bg-primary/10 text-primary border border-primary/20"
                                     : "text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent"
@@ -86,7 +88,7 @@ export function DashboardSidebar() {
                     <Link
                         href="/admin"
                         className={cn(
-                            "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all group relative mt-4",
+                            "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all group relative mt-3",
                             pathname === "/admin"
                                 ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
                                 : "text-zinc-400 hover:text-orange-400 hover:bg-orange-500/5 border border-transparent"
@@ -146,4 +148,4 @@ export function DashboardSidebar() {
             </div>
         </aside>
     );
-}
+});
