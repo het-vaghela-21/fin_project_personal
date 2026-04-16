@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
-export type TransactionCategory = 'Food' | 'Shopping' | 'Jewellery' | 'Stocks' | 'Travel' | 'Miscellaneous';
+export type TransactionCategory = string;
 export type TransactionType = 'credit' | 'debit';
 
 export interface Transaction {

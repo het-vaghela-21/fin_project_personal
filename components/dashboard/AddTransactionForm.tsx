@@ -9,10 +9,18 @@ export function AddTransactionForm() {
 
     const [amount, setAmount] = useState("");
     const [title, setTitle] = useState("");
-    const [category, setCategory] = useState<TransactionCategory>("Miscellaneous");
+    const [category, setCategory] = useState<string>("Food");
     const [type, setType] = useState<TransactionType>("debit");
 
-    const categories: TransactionCategory[] = ["Food", "Shopping", "Jewellery", "Stocks", "Travel", "Miscellaneous"];
+    const debitCategories = ["Food", "Shopping", "Jewellery", "Travel", "Utilities", "Health", "Miscellaneous"];
+    const creditCategories = ["Salary", "Freelance", "Investments", "Refunds", "Gifts", "Other Income"];
+
+    const currentCategories = type === "credit" ? creditCategories : debitCategories;
+
+    const handleTypeChange = (newType: TransactionType) => {
+        setType(newType);
+        setCategory(newType === "credit" ? creditCategories[0] : debitCategories[0]);
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,7 +36,7 @@ export function AddTransactionForm() {
 
         setAmount("");
         setTitle("");
-        setCategory("Miscellaneous");
+        setCategory(type === "credit" ? creditCategories[0] : debitCategories[0]);
     };
 
     return (
@@ -42,14 +50,14 @@ export function AddTransactionForm() {
                 <div className="flex bg-white/5 rounded-xl p-1 gap-1">
                     <button
                         type="button"
-                        onClick={() => setType("debit")}
+                        onClick={() => handleTypeChange("debit")}
                         className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all ${type === "debit" ? "bg-red-500/20 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]" : "text-zinc-500 hover:text-white"}`}
                     >
                         <ArrowDownRight className="w-4 h-4" /> Debit
                     </button>
                     <button
                         type="button"
-                        onClick={() => setType("credit")}
+                        onClick={() => handleTypeChange("credit")}
                         className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition-all ${type === "credit" ? "bg-green-500/20 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]" : "text-zinc-500 hover:text-white"}`}
                     >
                         <ArrowUpRight className="w-4 h-4" /> Credit
@@ -85,10 +93,10 @@ export function AddTransactionForm() {
                     <label className="text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-1 block">Category</label>
                     <select
                         value={category}
-                        onChange={(e) => setCategory(e.target.value as TransactionCategory)}
-                        className="w-full bg-[#121212] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-primary/50 transition-colors"
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full bg-[#121212] border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-primary/50 transition-colors cursor-pointer appearance-none"
                     >
-                        {categories.map(cat => (
+                        {currentCategories.map(cat => (
                             <option key={cat} value={cat}>{cat}</option>
                         ))}
                     </select>
