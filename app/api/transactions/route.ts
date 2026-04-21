@@ -27,7 +27,15 @@ export async function GET(req: NextRequest) {
             date: t.date,
         }));
 
-        return NextResponse.json({ transactions: mapped });
+        return NextResponse.json(
+            { transactions: mapped },
+            {
+                headers: {
+                    // Private (per-user) data: browser may cache briefly but must revalidate
+                    "Cache-Control": "private, max-age=0, must-revalidate",
+                },
+            }
+        );
     } catch (e) {
         const err = e as Error;
         return NextResponse.json({ error: err.message }, { status: 500 });

@@ -8,19 +8,14 @@ import { BarChart3, Clock, PieChart as PieChartIcon } from "lucide-react";
 
 type TimeRange = "7D" | "1M" | "6M" | "1Y" | "ALL";
 
-const COLORS = ["#7C3AED", "#22D3EE", "#4ADE80", "#F472B6", "#FBBF24", "#9F67FF"];
-
-const card = {
-    background: "rgba(13,13,26,0.70)",
-    backdropFilter: "blur(16px)",
-    border: "1px solid rgba(255,255,255,0.07)",
-    borderRadius: "1.5rem",
-};
+const COLORS = ["#006C49", "#008A5E", "#15B886", "#52D1AA", "#8FDFBD", "#CEF0D4"];
 
 const tooltipStyle = {
-    backgroundColor: "#0D0D1A",
-    borderColor: "rgba(124,58,237,0.25)",
+    backgroundColor: "var(--surface-container-lowest)",
+    borderColor: "currentColor",
+    color: "var(--on-surface)",
     borderRadius: "12px",
+    boxShadow: "0 10px 40px -10px rgba(0,0,0,0.08)",
 };
 
 // ── Chart skeleton shared by all loading states ──
@@ -29,7 +24,7 @@ function ChartSkeleton({ height = 400 }: { height?: number }) {
         <div className="w-full flex items-end gap-1.5 px-2" style={{ height }}>
             {[30, 55, 40, 75, 50, 90, 35, 60, 80, 45, 70, 95].map((h, i) => (
                 <div key={i} className="flex-1 rounded-t-sm animate-pulse"
-                    style={{ height: `${h}%`, background: i % 2 === 0 ? "rgba(124,58,237,0.14)" : "rgba(34,211,238,0.10)", animationDelay: `${i * 60}ms` }} />
+                    style={{ height: `${h}%`, background: i % 2 === 0 ? "rgba(0,108,73,0.1)" : "rgba(0,108,73,0.05)", animationDelay: `${i * 60}ms` }} />
             ))}
         </div>
     );
@@ -44,13 +39,13 @@ const DynamicLineChart = dynamic(
             return (
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={data} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-                        <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} tickFormatter={v => `₹${v}`} tickLine={false} axisLine={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                        <XAxis dataKey="date" stroke="#8E8E9E" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#8E8E9E" fontSize={12} tickFormatter={v => `₹${v}`} tickLine={false} axisLine={false} />
                         <Tooltip contentStyle={tooltipStyle} />
                         <Legend iconType="circle" />
-                        <Line type="monotone" dataKey="debit" name="Debit" stroke="#f87171" strokeWidth={3} dot={{ r: 4, strokeWidth: 0, fill: "#f87171" }} />
-                        <Line type="monotone" dataKey="credit" name="Credit" stroke="#22D3EE" strokeWidth={3} dot={{ r: 4, strokeWidth: 0, fill: "#22D3EE" }} />
+                        <Line type="monotone" dataKey="debit" name="Debit" stroke="#D62A2A" strokeWidth={3} dot={{ r: 4, strokeWidth: 0, fill: "#D62A2A" }} />
+                        <Line type="monotone" dataKey="credit" name="Credit" stroke="#006C49" strokeWidth={3} dot={{ r: 4, strokeWidth: 0, fill: "#006C49" }} />
                     </LineChart>
                 </ResponsiveContainer>
             );
@@ -68,13 +63,13 @@ const DynamicBarChart = dynamic(
             return (
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data} margin={{ top: 5, right: 20, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-                        <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} tickFormatter={v => `₹${v}`} tickLine={false} axisLine={false} />
-                        <Tooltip cursor={{ fill: "transparent" }} contentStyle={tooltipStyle} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                        <XAxis dataKey="date" stroke="#8E8E9E" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#8E8E9E" fontSize={12} tickFormatter={v => `₹${v}`} tickLine={false} axisLine={false} />
+                        <Tooltip cursor={{ fill: "rgba(0,0,0,0.02)" }} contentStyle={tooltipStyle} />
                         <Legend iconType="circle" />
-                        <Bar dataKey="debit" name="Debit" fill="#f87171" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="credit" name="Credit" fill="#22D3EE" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="debit" name="Debit" fill="#D62A2A" radius={[4, 4, 0, 0]} barSize={12} />
+                        <Bar dataKey="credit" name="Credit" fill="#006C49" radius={[4, 4, 0, 0]} barSize={12} />
                     </BarChart>
                 </ResponsiveContainer>
             );
@@ -92,10 +87,9 @@ const DynamicPieChart = dynamic(
             return (
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                        <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
+                        <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="var(--surface-container-lowest)" strokeWidth={2}>
                             {data.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                         </Pie>
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         <Tooltip formatter={(v: any) => `₹${Number(v).toFixed(2)}`} contentStyle={tooltipStyle} />
                     </PieChart>
                 </ResponsiveContainer>
@@ -146,20 +140,22 @@ export default function ChartsPage() {
         <div className="w-full max-w-7xl mx-auto space-y-8 relative z-10 pb-20">
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tighter flex items-center gap-3">
-                        <BarChart3 className="w-8 h-8 text-[#9F67FF]" /> Deep Analytics
+                    <h1 className="text-3xl font-bold text-on-surface tracking-tighter flex items-center gap-3">
+                        <BarChart3 className="w-8 h-8 text-primary" /> Deep Analytics
                     </h1>
-                    <p className="text-zinc-400 mt-0.5">Advanced cashflow and categorization visualizations.</p>
+                    <p className="text-on-surface-variant mt-0.5">Advanced cashflow and categorization visualizations.</p>
                 </div>
-                <div className="flex items-center gap-2 p-1 rounded-xl" style={{ background: "rgba(13,13,26,0.70)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                    <Clock className="w-4 h-4 text-zinc-400 ml-2" />
+                <div className="flex items-center gap-2 p-1 rounded-xl bg-surface-container-low border border-outline-variant/30 shadow-sm">
+                    <Clock className="w-4 h-4 text-outline ml-2" />
                     {(["7D", "1M", "6M", "1Y", "ALL"] as TimeRange[]).map(range => (
                         <button key={range} onClick={() => setRange(range)}
                             className="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
                             style={timeRange === range ? {
-                                background: "rgba(124,58,237,0.20)", color: "#9F67FF",
-                                border: "1px solid rgba(124,58,237,0.35)", boxShadow: "0 0 10px rgba(124,58,237,0.20)",
-                            } : { color: "#71717A", border: "1px solid transparent" }}>
+                                background: "var(--primary-container)", color: "var(--on-primary-container)",
+                                border: "1px solid rgba(0,108,73,0.2)", boxShadow: "0 1px 3px rgba(0,108,73,0.1)",
+                            } : { color: "var(--on-surface-variant)", border: "1px solid transparent" }}
+                            onMouseEnter={e => { if (timeRange !== range) (e.currentTarget.style.color = "var(--on-surface)"); }}
+                            onMouseLeave={e => { if (timeRange !== range) (e.currentTarget.style.color = "var(--on-surface-variant)"); }}>
                             {range}
                         </button>
                     ))}
@@ -169,53 +165,51 @@ export default function ChartsPage() {
             {/* Stat row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                    { label: "Period Debits",  value: `₹${totalDebitForPeriod.toFixed(2)}`,  color: "#f87171", border: "rgba(239,68,68,0.25)" },
-                    { label: "Period Credits", value: `₹${totalCreditForPeriod.toFixed(2)}`, color: "#22D3EE", border: "rgba(34,211,238,0.25)" },
+                    { label: "Period Debits",  value: `₹${totalDebitForPeriod.toFixed(2)}`,  color: "var(--error)", border: "var(--error-container)" },
+                    { label: "Period Credits", value: `₹${totalCreditForPeriod.toFixed(2)}`, color: "var(--primary)", border: "var(--primary-container)" },
                     { label: "Net Diff",       value: `₹${Math.abs(totalCreditForPeriod - totalDebitForPeriod).toFixed(2)}`,
-                      color: totalCreditForPeriod >= totalDebitForPeriod ? "#22D3EE" : "#f87171",
-                      border: totalCreditForPeriod >= totalDebitForPeriod ? "rgba(34,211,238,0.25)" : "rgba(239,68,68,0.25)" },
-                    { label: "Transactions",   value: String(filteredTransactions.length),   color: "#9F67FF", border: "rgba(124,58,237,0.25)" },
+                      color: totalCreditForPeriod >= totalDebitForPeriod ? "var(--primary)" : "var(--error)",
+                      border: totalCreditForPeriod >= totalDebitForPeriod ? "var(--primary-container)" : "var(--error-container)" },
+                    { label: "Transactions",   value: String(filteredTransactions.length),   color: "var(--on-surface)", border: "var(--surface-variant)" },
                 ].map(s => (
-                    <div key={s.label} className="p-4 rounded-2xl neon-hover-glow"
-                        style={{ ...card, borderLeft: `3px solid ${s.border}` }}>
-                        <div className="text-xs font-semibold text-zinc-500 uppercase mb-1">{s.label}</div>
-                        <div className="text-xl font-bold" style={{ color: s.color }}>{s.value}</div>
+                    <div key={s.label} className="p-4 rounded-2xl bg-surface-container-lowest ghost-border ambient-shadow transition-transform hover:-translate-y-1"
+                        style={{ borderLeft: `4px solid ${s.border}` }}>
+                        <div className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1 mt-1">{s.label}</div>
+                        <div className="text-xl font-bold bg-clip-text" style={{ color: s.color }}>{s.value}</div>
                     </div>
                 ))}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-8 space-y-8">
-                    <div className="p-6 h-[400px] flex flex-col neon-hover-glow" style={card}>
-                        <h2 className="text-xl font-bold text-white mb-6">Debit vs Credit (Trend)</h2>
+                    <div className="p-6 h-[400px] flex flex-col bg-surface-container-lowest ghost-border ambient-shadow rounded-[1.5rem]">
+                        <h2 className="text-xl font-bold text-on-surface mb-6">Debit vs Credit (Trend)</h2>
                         <div className="flex-1 w-full min-h-0"><DynamicLineChart data={timeSeriesData} /></div>
                     </div>
-                    <div className="p-6 h-[400px] flex flex-col neon-hover-glow" style={card}>
-                        <h2 className="text-xl font-bold text-white mb-6">Gross Volume per Day</h2>
+                    <div className="p-6 h-[400px] flex flex-col bg-surface-container-lowest ghost-border ambient-shadow rounded-[1.5rem]">
+                        <h2 className="text-xl font-bold text-on-surface mb-6">Gross Volume per Day</h2>
                         <div className="flex-1 w-full min-h-0"><DynamicBarChart data={timeSeriesData} /></div>
                     </div>
                 </div>
 
                 <div className="lg:col-span-4 space-y-8">
-                    <div className="p-6 flex flex-col neon-hover-glow" style={card}>
-                        <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-2">
-                            <PieChartIcon className="w-5 h-5 text-[#9F67FF]" /> Spending Distribution
+                    <div className="p-6 flex flex-col bg-surface-container-lowest ghost-border ambient-shadow rounded-[1.5rem]">
+                        <h2 className="text-xl font-bold text-on-surface flex items-center gap-2 mb-2">
+                            <PieChartIcon className="w-5 h-5 text-primary" /> Spending Distribution
                         </h2>
                         <div className="h-[250px] w-full">
                             {categoryData.length > 0
                                 ? <DynamicPieChart data={categoryData} />
-                                : <div className="w-full h-full flex items-center justify-center text-zinc-500 text-sm">No expenses for this period.</div>}
+                                : <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-sm">No expenses for this period.</div>}
                         </div>
                         <div className="space-y-3 mt-4">
                             {categoryData.map((entry, index) => (
-                                <div key={entry.name} className="flex items-center justify-between p-2 rounded-xl transition-colors"
-                                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(124,58,237,0.06)")}
-                                    onMouseLeave={e => (e.currentTarget.style.background = "")}>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                                        <span className="text-sm font-medium text-zinc-300">{entry.name}</span>
+                                <div key={entry.name} className="flex items-center justify-between p-2.5 rounded-xl transition-colors hover:bg-surface-variant/30">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-3.5 h-3.5 rounded-full ring-2 ring-surface-container-lowest" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                                        <span className="text-sm font-medium text-on-surface-variant hover:text-on-surface">{entry.name}</span>
                                     </div>
-                                    <div className="text-sm font-bold text-white">₹{entry.value.toFixed(2)}</div>
+                                    <div className="text-sm font-bold text-on-surface">₹{entry.value.toFixed(2)}</div>
                                 </div>
                             ))}
                         </div>

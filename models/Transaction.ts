@@ -23,4 +23,7 @@ const TransactionSchema = new Schema<ITransaction>(
     { timestamps: true }
 );
 
+// Compound index: satisfies `find({ userId }).sort({ date: -1 })` in one scan
+TransactionSchema.index({ userId: 1, date: -1 });
+
 export const Transaction = models.Transaction || model<ITransaction>("Transaction", TransactionSchema);

@@ -40,6 +40,7 @@ CRITICAL RULES:
 2. If the user asks about anything else, firmly reject the query and explain you are a specialized financial AI.
 3. Be concise, professional, and analytical. Use bold formatting to highlight key numbers or insights.
 4. Always complete your responses fully. Never truncate sentences.
+5. You MUST format all monetary values using the Indian Rupee symbol (₹). Do NOT use ($).
 
 USER'S CURRENT FINANCIAL CONTEXT:
 - Total Cash Received (Credit): ₹${totalCredit.toFixed(2)}

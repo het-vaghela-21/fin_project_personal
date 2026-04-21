@@ -19,9 +19,25 @@ export async function connectMongo() {
     if (!cached.promise) {
         cached.promise = mongoose.connect(MONGODB_URI, {
             bufferCommands: false,
-        }).then((m) => m);
+            // Keep a small pool — prevents cold-reconnect delay on every request
+            maxPoolSize: 5,
+            // Fail fast if the server is unreachable (avoids 30s default hang)
+            serverSelectionTimeoutMS: 5000,
+            connectTimeoutMS: 5000,
+            socketTimeoutMS: 15000,
+        }).then((m) => m).catch((err) => {
+            console.error("MongoDB connection failed:", err);
+            cached.promise = null; // reset to allow retry
+            throw err;
+        });
     }
 
-    cached.conn = await cached.promise;
+    try {
+        cached.conn = await cached.promise;
+    } catch (e) {
+        cached.promise = null;
+        throw e;
+    }
+    
     return cached.conn;
 }

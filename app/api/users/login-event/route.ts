@@ -10,20 +10,25 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Missing uid" }, { status: 400 });
         }
 
-        await connectMongo();
-
-        // Resolve location from IP using free ip-api.com
+        // ── Geo-lookup with a hard 2-second timeout ─────────────────────────
+        // Previously this could hang for 6s+ if ip-api.com was slow/unreachable.
         let city = "Unknown";
         let country = "Unknown";
         try {
-            const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=city,country,status`);
+            const controller = new AbortController();
+            const geoTimeout = setTimeout(() => controller.abort(), 2000); // 2s max
+            const geoRes = await fetch(
+                `http://ip-api.com/json/${ip}?fields=city,country,status`,
+                { signal: controller.signal }
+            );
+            clearTimeout(geoTimeout);
             const geoData = await geoRes.json();
             if (geoData.status === "success") {
                 city = geoData.city || "Unknown";
                 country = geoData.country || "Unknown";
             }
         } catch {
-            // geo lookup failed — keep defaults
+            // Geo lookup timed out or failed — keep defaults, don't block response
         }
 
         const loginEvent = {
@@ -34,18 +39,25 @@ export async function POST(req: NextRequest) {
             device: device || "Unknown",
         };
 
-        await User.findOneAndUpdate(
-            { uid },
-            {
-                $push: {
-                    loginHistory: {
-                        $each: [loginEvent],
-                        $slice: -50, // keep last 50 logins
+        // ── Fire-and-forget DB write ─────────────────────────────────────────
+        // We respond immediately and let MongoDB write happen asynchronously.
+        // { w: 0 } means we don't wait for write acknowledgement.
+        connectMongo().then(() => {
+            User.findOneAndUpdate(
+                { uid },
+                {
+                    $push: {
+                        loginHistory: {
+                            $each: [loginEvent],
+                            $slice: -50,
+                        },
                     },
                 },
-            }
-        );
+                { w: 0 } as Parameters<typeof User.findOneAndUpdate>[2]
+            ).catch((e: Error) => console.error("[login-event] db write:", e.message));
+        }).catch((e: Error) => console.error("[login-event] mongo conn:", e.message));
 
+        // Respond instantly — client doesn't need to wait for the DB write
         return NextResponse.json({ success: true, location: { city, country } });
     } catch (err) {
         const e = err as Error;

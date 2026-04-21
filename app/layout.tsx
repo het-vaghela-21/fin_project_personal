@@ -11,6 +11,8 @@ const inter = Inter({
   display: 'swap',
 });
 
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 export const metadata: Metadata = {
   title: "FinAI – AI-Powered Investment Platform",
   description: "Transform your wealth with AI-driven insights, OSINT market intelligence, and automated risk management—all from one highly-secure dashboard.",
@@ -23,13 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", inter.variable)}>
+    <html lang="en" className={cn("font-sans", inter.variable)} suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
-        <AuthProvider>
-          <div className="relative z-10">
-            {children}
-          </div>
-        </AuthProvider>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <AuthProvider>
+            <div className="relative z-10 w-full min-h-screen">
+              {children}
+            </div>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

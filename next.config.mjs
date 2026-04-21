@@ -16,7 +16,19 @@ const nextConfig = {
             'lucide-react',
             'recharts',
             'date-fns',
+            'framer-motion',
+            '@google/genai',
+            'firebase',
+            'firebase-admin',
         ],
+    },
+
+    // SWC modularize imports — secondary tree-shake for lucide-react
+    modularizeImports: {
+        'lucide-react': {
+            transform: 'lucide-react/dist/esm/icons/{{ kebabCase member }}',
+            preventFullImport: true,
+        },
     },
 
     images: {

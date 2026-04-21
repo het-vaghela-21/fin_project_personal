@@ -5,21 +5,14 @@ import { useDashboard } from "@/components/DashboardProvider";
 import { ReceiptText, Trash2, ArrowUpRight, ArrowDownRight, Filter, Download, Loader2 } from "lucide-react";
 import { format, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-
-const card = {
-    background: "rgba(13,13,26,0.70)",
-    backdropFilter: "blur(16px)",
-    border: "1px solid rgba(255,255,255,0.07)",
-    borderRadius: "1.5rem",
-};
+import { AddTransactionForm } from "@/components/dashboard/AddTransactionForm";
 
 export default function TransactionsPage() {
     const { transactions, loadingTransactions, deleteTransaction } = useDashboard();
     const [activeTab, setActiveTab] = useState<string>("All");
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
+    const [isExporting, setIsExporting] = useState(false);
 
     const dynamicCategories = Array.from(new Set(transactions.map(t => t.category)));
     const categories: string[] = ["All", ...dynamicCategories];
@@ -32,22 +25,33 @@ export default function TransactionsPage() {
         return true;
     });
 
-    const handleDownloadPDF = () => {
-        const doc = new jsPDF();
-        doc.setFontSize(18);
-        doc.text("Transaction Ledger Report", 14, 22);
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        let subtitle = `Report generated on ${format(new Date(), "MMM dd, yyyy")}`;
-        if (startDate || endDate) subtitle += ` | Period: ${startDate ? format(new Date(startDate), "MMM dd, yyyy") : "Start"} to ${endDate ? format(new Date(endDate), "MMM dd, yyyy") : "End"}`;
-        doc.text(subtitle, 14, 30);
-        const tableColumn = ["Date", "Time", "Title", "Category", "Type", "Amount (INR)"];
-        const tableRows = filteredTransactions.map(tx => [
-            format(tx.date, "dd/MM/yyyy"), format(tx.date, "hh:mm a"), tx.title, tx.category,
-            tx.type.toUpperCase(), `${tx.type === "credit" ? "+" : "-"} ₹${tx.amount.toFixed(2)}`
-        ]);
-        autoTable(doc, { head: [tableColumn], body: tableRows, startY: 40, theme: "striped", headStyles: { fillColor: [124, 58, 237] } });
-        doc.save("transaction_report.pdf");
+    const handleDownloadPDF = async () => {
+        setIsExporting(true);
+        try {
+            const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+                import("jspdf"),
+                import("jspdf-autotable"),
+            ]);
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.text("Transaction Ledger Report", 14, 22);
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+            let subtitle = `Report generated on ${format(new Date(), "MMM dd, yyyy")}`;
+            if (startDate || endDate) subtitle += ` | Period: ${startDate ? format(new Date(startDate), "MMM dd, yyyy") : "Start"} to ${endDate ? format(new Date(endDate), "MMM dd, yyyy") : "End"}`;
+            doc.text(subtitle, 14, 30);
+            const tableColumn = ["Date", "Time", "Title", "Category", "Type", "Amount (INR)"];
+            const tableRows = filteredTransactions.map(tx => [
+                format(tx.date, "dd/MM/yyyy"), format(tx.date, "hh:mm a"), tx.title, tx.category,
+                tx.type.toUpperCase(), `${tx.type === "credit" ? "+" : "-"} ₹${tx.amount.toFixed(2)}`
+            ]);
+            autoTable(doc, { head: [tableColumn], body: tableRows, startY: 40, theme: "striped", headStyles: { fillColor: [0, 108, 73] } });
+            doc.save("transaction_report.pdf");
+        } catch (error) {
+            console.error("Failed to generate PDF:", error);
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     return (
@@ -55,43 +59,43 @@ export default function TransactionsPage() {
             {/* Header */}
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tighter flex items-center gap-3">
-                        <ReceiptText className="w-8 h-8 text-[#22D3EE]" /> Transaction Ledger
+                    <h1 className="text-3xl font-bold text-on-surface tracking-tighter flex items-center gap-3">
+                        <ReceiptText className="w-8 h-8 text-primary" /> Transaction Ledger
                     </h1>
-                    <p className="text-zinc-400 mt-0.5">Search, filter, and export all historic cashflow.</p>
+                    <p className="text-on-surface-variant mt-0.5">Search, filter, export or add new cashflow entries.</p>
                 </div>
                 <button
                     onClick={handleDownloadPDF}
                     disabled={filteredTransactions.length === 0}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-medium transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{
-                        background: "linear-gradient(135deg, #7C3AED, #22D3EE)",
-                        boxShadow: "0 0 18px rgba(124,58,237,0.35)",
-                    }}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-medium transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed glass-gradient shadow-ambient"
                 >
                     <Download className="w-4 h-4" /> Download PDF
                 </button>
             </header>
 
+            {/* Add Transaction Section */}
+            <div className="w-full">
+                <AddTransactionForm />
+            </div>
+
             {/* Date Filters & Category Tabs */}
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 {/* Date */}
-                <div className="flex items-center gap-3 p-2 rounded-xl text-sm w-full lg:w-auto overflow-x-auto"
-                    style={{ background: "rgba(13,13,26,0.70)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <div className="flex items-center gap-3 p-2 rounded-xl text-sm w-full lg:w-auto overflow-x-auto bg-surface-container-low border border-outline-variant/30">
                     <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-zinc-500 ml-2">From:</span>
+                        <span className="text-on-surface-variant ml-2">From:</span>
                         <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
-                            className="bg-transparent text-white border-none outline-none cursor-pointer w-32" style={{ colorScheme: "dark" }} />
+                            className="bg-transparent text-on-surface border-none outline-none cursor-pointer w-32" />
                     </div>
-                    <div className="w-px h-6 shrink-0" style={{ background: "rgba(124,58,237,0.25)" }} />
+                    <div className="w-px h-6 shrink-0 bg-outline-variant/50" />
                     <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-zinc-500">To:</span>
+                        <span className="text-on-surface-variant">To:</span>
                         <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
-                            className="bg-transparent text-white border-none outline-none cursor-pointer w-32" style={{ colorScheme: "dark" }} />
+                            className="bg-transparent text-on-surface border-none outline-none cursor-pointer w-32" />
                     </div>
                     {(startDate || endDate) && (
                         <button onClick={() => { setStartDate(""); setEndDate(""); }}
-                            className="text-xs ml-2 px-2 transition-colors" style={{ color: "#9F67FF" }}>
+                            className="text-xs ml-2 px-2 transition-colors text-primary hover:text-primary/80">
                             Reset
                         </button>
                     )}
@@ -99,20 +103,15 @@ export default function TransactionsPage() {
 
                 {/* Category Tabs */}
                 <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1">
-                    <div className="flex items-center gap-2 px-2 py-1.5 rounded-xl shrink-0"
-                        style={{ background: "rgba(13,13,26,0.70)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                        <Filter className="w-4 h-4 text-zinc-500 ml-2" />
+                    <div className="flex items-center gap-2 px-2 py-1.5 rounded-xl shrink-0 bg-surface-container-low border border-outline-variant/30">
+                        <Filter className="w-4 h-4 text-outline ml-2" />
                         {categories.map(cat => (
                             <button key={cat} onClick={() => setActiveTab(cat)}
-                                className={cn("px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap")}
-                                style={activeTab === cat ? {
-                                    background: "rgba(124,58,237,0.18)",
-                                    color: "#9F67FF",
-                                    border: "1px solid rgba(124,58,237,0.35)",
-                                    boxShadow: "0 0 10px rgba(124,58,237,0.20)",
-                                } : { color: "#71717A", border: "1px solid transparent" }}
-                                onMouseEnter={e => { if (activeTab !== cat) (e.currentTarget.style.color = "#fff"); }}
-                                onMouseLeave={e => { if (activeTab !== cat) (e.currentTarget.style.color = "#71717A"); }}
+                                className={cn("px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap",
+                                    activeTab === cat 
+                                        ? "bg-primary-container/40 text-primary shadow-sm border border-primary/20" 
+                                        : "text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/30 border border-transparent"
+                                )}
                             >
                                 {cat}
                             </button>
@@ -122,54 +121,48 @@ export default function TransactionsPage() {
             </div>
 
             {/* Transactions List */}
-            <div className="overflow-hidden min-h-[400px]" style={{ ...card, borderRadius: "1.5rem" }}>
-                <div className="px-6 py-4 border-b" style={{ borderColor: "rgba(124,58,237,0.10)", background: "rgba(124,58,237,0.04)" }}>
-                    <h2 className="text-lg font-bold text-white">Recent Entries</h2>
+            <div className="overflow-hidden min-h-[400px] bg-surface-container-lowest ghost-border shadow-ambient rounded-[1.5rem]">
+                <div className="px-6 py-4 border-b border-outline-variant/30 bg-surface-variant/30">
+                    <h2 className="text-lg font-bold text-on-surface">Recent Entries</h2>
                 </div>
-                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                <div className="divide-y divide-outline-variant/30">
                     {loadingTransactions ? (
-                        <div className="flex flex-col items-center justify-center p-20 gap-3 text-zinc-500">
-                            <Loader2 className="w-8 h-8 animate-spin text-[#9F67FF]/50" />
+                        <div className="flex flex-col items-center justify-center p-20 gap-3 text-on-surface-variant">
+                            <Loader2 className="w-8 h-8 animate-spin text-primary/50" />
                             <p>Loading transactions...</p>
                         </div>
                     ) : filteredTransactions.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center p-20 text-center text-zinc-500">
+                        <div className="flex flex-col items-center justify-center p-20 text-center text-on-surface-variant">
                             <p>No transactions found for this period/category.</p>
                         </div>
                     ) : (
                         filteredTransactions.map(tx => (
-                            <div key={tx.id} className="p-4 sm:p-6 transition-colors flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group"
-                                style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-                                onMouseEnter={e => (e.currentTarget.style.background = "rgba(124,58,237,0.04)")}
-                                onMouseLeave={e => (e.currentTarget.style.background = "")}>
+                            <div key={tx.id} className="p-4 sm:p-6 transition-colors flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group hover:bg-surface-container-low">
                                 <div className="flex items-center gap-4">
-                                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0")}
-                                        style={tx.type === "credit"
-                                            ? { background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.22)", color: "#22D3EE" }
-                                            : { background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.22)", color: "#f87171" }}>
+                                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm",
+                                            tx.type === "credit"
+                                                ? "bg-primary-container text-on-primary-container"
+                                                : "bg-error-container text-on-error-container"
+                                        )}>
                                         {tx.type === "credit" ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
                                     </div>
                                     <div>
-                                        <div className="text-white font-semibold text-lg">{tx.title}</div>
+                                        <div className="text-on-surface font-semibold text-lg">{tx.title}</div>
                                         <div className="flex items-center gap-3 text-sm mt-1">
-                                            <span className="text-zinc-500 font-mono">{format(tx.date, "MMM dd, yyyy • hh:mm a")}</span>
-                                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
-                                            <span className="px-2 py-0.5 rounded-md text-xs font-medium"
-                                                style={{ background: "rgba(124,58,237,0.10)", border: "1px solid rgba(124,58,237,0.22)", color: "#9F67FF" }}>
+                                            <span className="text-on-surface-variant font-mono">{format(tx.date, "MMM dd, yyyy • hh:mm a")}</span>
+                                            <span className="w-1.5 h-1.5 rounded-full bg-outline-variant" />
+                                            <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-primary-container/30 border border-primary-container/50 text-primary">
                                                 {tx.category}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                                    <div className={cn("text-xl font-bold font-mono text-right", tx.type === "credit" ? "text-[#22D3EE]" : "text-red-400")}>
+                                    <div className={cn("text-xl font-bold font-mono text-right", tx.type === "credit" ? "text-primary" : "text-error")}>
                                         {tx.type === "credit" ? "+" : "-"}₹{tx.amount.toFixed(2)}
                                     </div>
                                     <button onClick={() => deleteTransaction(tx.id)} disabled={loadingTransactions}
-                                        className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-600 hover:text-red-400 transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100 disabled:opacity-50"
-                                        style={{ border: "1px solid transparent" }}
-                                        onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.08)")}
-                                        onMouseLeave={e => (e.currentTarget.style.background = "")}>
+                                        className="w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:text-error hover:bg-error-container transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100 disabled:opacity-50">
                                         <Trash2 className="w-5 h-5" />
                                     </button>
                                 </div>

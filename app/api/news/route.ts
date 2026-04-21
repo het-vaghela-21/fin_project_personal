@@ -25,10 +25,15 @@ export async function GET(request: NextRequest) {
         
         // 1. If NOT forcing a refresh, use the 15-minute cache
         if (!forceRefresh && cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-            return NextResponse.json({
-                articles: cached.articles.slice(0, count),
-                fromCache: true,
-            });
+            return NextResponse.json(
+                { articles: cached.articles.slice(0, count), fromCache: true },
+                {
+                    headers: {
+                        // Publicly cacheable — 15 min fresh, serve stale for up to 30 min while revalidating
+                        "Cache-Control": "public, s-maxage=900, stale-while-revalidate=1800",
+                    },
+                }
+            );
         }
 
         // 2. If forcing a refresh, enforce a 60-second cooldown to protect the free API quota (100 req/day)

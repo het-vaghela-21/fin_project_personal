@@ -1,5 +1,4 @@
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,233 +9,86 @@
   }
 }
 
-/* ============================================================
-   QUANTEXA-INSPIRED ENTERPRISE DESIGN SYSTEM
-   ============================================================ */
-
-/* ---------- CSS Custom Properties (Tokens) ---------- */
+/* ---------- Theme Token Definitions ---------- */
 :root {
-  /* Brand Colors */
-  --qx-bg:        #05050F;
-  --qx-surface:   #0D0D1A;
-  --qx-surface-2: #12102A;
-  --qx-violet:    #7C3AED;
-  --qx-violet-lt: #9F67FF;
-  --qx-cyan:      #22D3EE;
-  --qx-cyan-lt:   #67E8F9;
-  --qx-border:    rgba(255,255,255,0.07);
-  --qx-border-glow: rgba(124,58,237,0.35);
-  --qx-text:      #F4F4F8;
-  --qx-muted:     #71717A;
+  /* LIGHT THEME (Veridian Ledger Scheme) */
+  --background: #effcf9;
+  --foreground: #121e1c;
+  --surface: #effcf9;
+  --surface-container-low: #e9f6f3;
+  --surface-container-lowest: #ffffff;
+  --surface-container: #d8e5e2;
+  --surface-variant: #d8e5e2;
+  --on-surface: #121e1c;
+  --on-surface-variant: #3c4a42;
+  
+  --primary: #006c49;
+  --primary-container: #10b981;
+  --on-primary: #ffffff;
+  
+  --tertiary: #ba1a1a; /* for debt/liabilities */
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --outline: #bbcabf;
+  
+  --shadow-color: rgba(6, 78, 59, 0.08); /* Greenish dark shadow */
+}
 
-  /* Shadcn tokens — kept for compatibility */
-  --background: oklch(0.072 0.016 285);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.105 0.02 285);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.105 0.02 285);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.58 0.245 283.5);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.18 0.025 285);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.18 0.025 285);
-  --muted-foreground: oklch(0.55 0 0);
-  --accent: oklch(0.73 0.18 195);
-  --accent-foreground: oklch(0.072 0.016 285);
-  --destructive: oklch(0.58 0.22 27);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.58 0.245 283.5);
-  --chart-1: oklch(0.73 0.18 195);
-  --chart-2: oklch(0.58 0.245 283.5);
-  --chart-3: oklch(0.66 0.22 265);
-  --chart-4: oklch(0.80 0.12 160);
-  --chart-5: oklch(0.70 0.14 30);
-  --radius: 0.75rem;
-
-  /* Sidebar */
-  --sidebar: oklch(0.105 0.02 285);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.58 0.245 283.5);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.18 0.025 285);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.58 0.245 283.5);
+.dark {
+  /* DARK THEME (Quantexa Modern Scheme) */
+  --background: #05050F;
+  --foreground: #ffffff;
+  --surface: #05050F;
+  --surface-container-low: #0D0D1A;
+  --surface-container-lowest: #0b0b14;
+  --surface-container: #1e1b4b;
+  --surface-variant: #1e1b4b;
+  --on-surface: #ffffff;
+  --on-surface-variant: #a1a1aa; /* zinc-400 */
+  
+  --primary: #7C3AED;      /* qx-violet */
+  --primary-container: #9F67FF; /* qx-violet-lt */
+  --on-primary: #ffffff;
+  
+  --tertiary: #ff4d4f; /* soft red for dark mode liabilities */
+  --error: #ef4444; 
+  --error-container: #450a0a;
+  --outline: rgba(124, 58, 237, 0.2); /* faint violet border */
+  
+  --shadow-color: rgba(124, 58, 237, 0.15); /* Purple shadow */
 }
 
 /* ---------- Base ---------- */
 @layer base {
-  .theme { --font-sans: var(--font-sans); }
-
   body {
-    background-color: var(--qx-bg);
-    color: var(--qx-text);
+    background-color: var(--background);
+    color: var(--foreground);
     @apply antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
-
-  html { @apply font-sans; scroll-behavior: smooth; }
-
-  ::selection { background: rgba(124,58,237,0.35); }
 }
 
 /* ---------- Utility Classes ---------- */
 @layer utilities {
-  /* Glass panel */
+  .ghost-border {
+    border: 1px solid var(--outline);
+    transition: border-color 0.3s ease;
+  }
+  
+  .ambient-shadow {
+    box-shadow: 0 20px 40px -10px var(--shadow-color);
+  }
+
   .glass-panel {
-    background: rgba(13, 13, 26, 0.6);
+    background: var(--surface-container-lowest);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--qx-border);
+    border: 1px solid var(--outline);
   }
-
-  /* Neon glow on hover (violet) */
-  .neon-hover-glow {
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
-  }
-  .neon-hover-glow:hover {
-    box-shadow: 0 0 28px rgba(124,58,237,0.30), 0 0 60px rgba(124,58,237,0.12);
-    border-color: var(--qx-border-glow) !important;
-  }
-
-  /* Cyan accent glow */
-  .neon-cyan-glow:hover {
-    box-shadow: 0 0 28px rgba(34,211,238,0.30), 0 0 60px rgba(34,211,238,0.10);
-  }
-
-  /* Gradient text — violet to cyan */
-  .gradient-text {
-    background: linear-gradient(135deg, #9F67FF 0%, #22D3EE 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Bento grid layout */
-  .bento-grid {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 1.5rem;
-  }
-
-  /* Marquee container */
-  .marquee-track {
-    display: flex;
-    width: max-content;
-    animation: marquee 32s linear infinite;
-  }
-  .marquee-track:hover { animation-play-state: paused; }
-
-  /* Reveal animation base state */
-  .reveal {
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-                transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .reveal.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Staggered delay helpers */
-  .delay-100 { transition-delay: 0.1s !important; }
-  .delay-200 { transition-delay: 0.2s !important; }
-  .delay-300 { transition-delay: 0.3s !important; }
-  .delay-400 { transition-delay: 0.4s !important; }
-  .delay-500 { transition-delay: 0.5s !important; }
-  .delay-600 { transition-delay: 0.6s !important; }
 }
 
 /* ---------- Keyframe Animations ---------- */
-
-/* Infinite horizontal marquee */
-@keyframes marquee {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-/* Floating node pulse */
-@keyframes floatNode {
-  0%, 100% { transform: translateY(0px); opacity: 0.6; }
-  50%       { transform: translateY(-10px); opacity: 1; }
-}
-
-/* Pulsing ring for CTA / nodes */
-@keyframes pulseRing {
-  0%   { transform: scale(1);   opacity: 0.7; }
-  70%  { transform: scale(1.6); opacity: 0; }
-  100% { transform: scale(1.6); opacity: 0; }
-}
-
-/* SVG path draw animation */
-@keyframes drawLine {
-  0%   { stroke-dashoffset: 1000; opacity: 0.2; }
-  50%  { opacity: 0.6; }
-  100% { stroke-dashoffset: 0;    opacity: 0.2; }
-}
-
-/* Aurora orb drift */
-@keyframes auroraShift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%       { transform: translate(4%, 3%) scale(1.05); }
-  66%       { transform: translate(-3%, 5%) scale(0.97); }
-}
-
-/* Scroll-indicator bounce */
-@keyframes bounceDown {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(8px); }
-}
-
-/* Fade In + slide up (used inline for hero elements) */
-@keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Typing cursor blink */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
-}
-
-/* Data bar grow */
-@keyframes barGrow {
-  from { height: 0; }
-  to   { height: var(--bar-h); }
-}
-
-/* Subtle spin for decorative elements */
-@keyframes slowSpin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-/* Ambient glow pulse (existing, retained for AmbientBackground) */
-@keyframes ambientPulse {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50%       { opacity: 0.9; transform: scale(1.04); }
-}
-
-/* ── Particle float animations (used by CSSParticles) ──
-   Defined here so the component doesn't inject a <style> tag on every render */
-@keyframes float-up {
-  0%   { transform: translateY(100vh) scale(0); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translateY(-10vh) scale(0); opacity: 0; }
-}
-@keyframes float-down {
-  0%   { transform: translateY(-10vh) scale(0); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translateY(100vh) scale(0); opacity: 0; }
-}
-@keyframes float-diagonal {
-  0%   { transform: translate(-10vw, 100vh) scale(0); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translate(100vw, -10vh) scale(0); opacity: 0; }
-}
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes floatNode { 0%, 100% { transform: translateY(0px); opacity: 0.6; } 50% { transform: translateY(-10px); opacity: 1; } }
+@keyframes pulseRing { 0% { transform: scale(1); opacity: 0.7; } 70%, 100% { transform: scale(1.6); opacity: 0; } }
+@keyframes shimmer { 100% { transform: translateX(100%); } }

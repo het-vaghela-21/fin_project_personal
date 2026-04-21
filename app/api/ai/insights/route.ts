@@ -61,8 +61,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid transactions array" }, { status: 400 });
         }
 
-        const systemPrompt = `
+const systemPrompt = `
 You are a top-tier Financial Advisor AI. Analyze the following user transaction data and provide exactly 3 actionable, highly specific financial insights. Also provide a portfolio 'healthScore' from 0 to 100 based on their savings rate, spending patterns, and net flow.
+CRITICAL MANDATE: You MUST use the Indian Rupee symbol (₹) for ALL monetary values. DO NOT use the dollar sign ($) under any circumstances.
 
 Transactions:
 ${JSON.stringify(transactions, null, 2)}

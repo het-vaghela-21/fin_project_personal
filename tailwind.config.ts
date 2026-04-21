@@ -6,19 +6,30 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        // Quantexa brand palette
-        "qx-bg":        "#05050F",
-        "qx-surface":   "#0D0D1A",
-        "qx-surface-2": "#12102A",
-        "qx-violet":    "#7C3AED",
-        "qx-violet-lt": "#9F67FF",
-        "qx-cyan":      "#22D3EE",
-        "qx-cyan-lt":   "#67E8F9",
+        // Unified Semantic Tokens
+        "surface":                  "var(--surface)",
+        "surface-container-low":    "var(--surface-container-low)",
+        "surface-container-lowest": "var(--surface-container-lowest)",
+        "surface-container":        "var(--surface-container)",
+        "surface-variant":          "var(--surface-variant)",
+        "on-surface":               "var(--on-surface)",
+        "on-surface-variant":       "var(--on-surface-variant)",
+        "primary":                  "var(--primary)",
+        "primary-container":        "var(--primary-container)",
+        "on-primary":               "var(--on-primary)",
+        "tertiary":                 "var(--tertiary)",
+        "error":                    "var(--error)",
+        "error-container":          "var(--error-container)",
+        "outline":                  "var(--outline)"
+      },
+      boxShadow: {
+        'ambient': '0 20px 40px -10px var(--shadow-color)',
       },
       animation: {
         marquee:     "marquee 32s linear infinite",
@@ -29,18 +40,15 @@ const config: Config = {
         fadeSlideUp: "fadeSlideUp 0.7s cubic-bezier(0.22,1,0.36,1) forwards",
         pulseRing:   "pulseRing 2s ease-out infinite",
         slowSpin:    "slowSpin 20s linear infinite",
+        shimmer:     "shimmer 2s infinite",
       },
       keyframes: {
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
         }
-      },
-      animation: {
-        shimmer: 'shimmer 2s infinite',
       }
     },
   },
   plugins: [],
 };
 export default config;
-

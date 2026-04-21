@@ -26,7 +26,7 @@ export interface Goal {
 interface DashboardContextType {
     transactions: Transaction[];
     loadingTransactions: boolean;
-    addTransaction: (tx: Omit<Transaction, 'id'>) => Promise<void>;
+    addTransaction: (tx: Omit<Transaction, 'id'>) => Promise<{ success: boolean; error?: string }>;
     deleteTransaction: (id: string) => Promise<void>;
     goals: Goal[];
     loadingGoals: boolean;
@@ -61,7 +61,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
                     fetch("/api/transactions", { headers: { 'Authorization': `Bearer ${token}` } }),
                     fetch("/api/goals", { headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
-                
+
                 if (txRes.ok) {
                     const data = await txRes.json();
                     const txs = (data.transactions || []).map((t: { date: string | number | Date }) => ({
@@ -94,8 +94,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         fetchTransactionsAndGoals();
     }, [user]);
 
-    const addTransaction = async (tx: Omit<Transaction, 'id'>) => {
-        if (!user) return;
+    const addTransaction = async (tx: Omit<Transaction, 'id'>): Promise<{ success: boolean; error?: string }> => {
+        if (!user) return { success: false, error: "Not logged in" };
         try {
             const token = user.uid;
             const res = await fetch("/api/transactions", {
@@ -119,9 +119,15 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
                     date: new Date(data.transaction.date)
                 };
                 setTransactions(prev => [newTx, ...prev].sort((a, b) => b.date.getTime() - a.date.getTime()));
+                return { success: true };
+            } else {
+                const errData = await res.json();
+                console.error("Failed to add transaction:", errData.error);
+                return { success: false, error: errData.error };
             }
         } catch (err) {
             console.error("Error adding transaction:", err);
+            return { success: false, error: (err as Error).message };
         }
     };
 

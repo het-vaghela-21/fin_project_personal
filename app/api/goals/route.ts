@@ -26,7 +26,14 @@ export async function GET(req: NextRequest) {
             createdAt: g.createdAt,
         }));
 
-        return NextResponse.json({ goals: mapped });
+        return NextResponse.json(
+            { goals: mapped },
+            {
+                headers: {
+                    "Cache-Control": "private, max-age=0, must-revalidate",
+                },
+            }
+        );
     } catch (e) {
         const err = e as Error;
         return NextResponse.json({ error: err.message }, { status: 500 });
