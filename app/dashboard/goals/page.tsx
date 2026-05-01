@@ -108,7 +108,7 @@ export default function GoalsPage() {
 
                             <button
                                 type="submit"
-                                className="w-full py-4 rounded-xl glass-gradient text-white font-bold transition-all shadow-ambient hover:opacity-90 mt-2"
+                                className="w-full py-4 rounded-xl bg-primary text-on-primary font-bold transition-all shadow-ambient hover:opacity-90 mt-2"
                             >
                                 Set Target
                             </button>

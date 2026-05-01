@@ -67,11 +67,20 @@ export default function DashboardPage() {
                 
                 {/* Total Net Worth Card (Hero) */}
                 <div className="lg:col-span-8 bg-surface-container-lowest rounded-[2rem] relative overflow-hidden ambient-shadow flex flex-col justify-between min-h-[400px] ghost-border">
-                    {/* Background Decorative Abstract 3D — right half only */}
+                    {/* Background Decorative Abstract 3D — Light Theme */}
                     <div 
-                        className="absolute right-0 top-0 w-1/2 h-full pointer-events-none hero-image-blend" 
+                        className="absolute right-0 top-0 w-1/2 h-full pointer-events-none hero-image-blend dark:hidden block" 
                         style={{ 
-                            backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBjMjijCBBc6sB1jtCReNgOXowWUl7eicpEpeA91WUHoBEiumW5GN2nDZNVwFO8eaGAmlkM7GS0IiIF1Cxp9RCBUeikGdtL3ZYbUKAXrzKG5K4NcGS8h0hTsHIapLTIu5nkRs29fU8Y9MRa8UuAyvEAnox0F04QkWdEi0N_wmHaYVUx30Qij3m2hhad6ywEERA-jxlxheHGpFNXLSFlRalzwt_CY1_obmDr534Op_jMfwG3HMNmbw7xV1kAlJrKM835lxnDniyp2uY')", 
+                            backgroundImage: "url('/light_hero.png')", 
+                            backgroundSize: 'cover', 
+                            backgroundPosition: 'center left'
+                        }}
+                    ></div>
+                    {/* Background Decorative Abstract 3D — Dark Theme */}
+                    <div 
+                        className="absolute right-0 top-0 w-1/2 h-full pointer-events-none hero-image-blend hidden dark:block" 
+                        style={{ 
+                            backgroundImage: "url('/dark_hero.png')", 
                             backgroundSize: 'cover', 
                             backgroundPosition: 'center left'
                         }}
