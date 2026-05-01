@@ -98,7 +98,7 @@ const DynamicLineChart = dynamic(
 // ── Dynamically import BarChart ──
 const DynamicBarChart = dynamic(
     () => import("recharts").then((m) => {
-        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } = m;
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } = m;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         function BC({ data }: { data: any[] }) {
             return (
