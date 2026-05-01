@@ -12,6 +12,7 @@ const inter = Inter({
 });
 
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { ParticlesBackground } from "@/components/ui/ParticlesBackground";
 
 export const metadata: Metadata = {
   title: "FinAI – AI-Powered Investment Platform",
@@ -29,6 +30,7 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <AuthProvider>
+            <ParticlesBackground />
             <div className="relative z-10 w-full min-h-screen">
               {children}
             </div>
