@@ -13,8 +13,8 @@ export default function TransactionsPage() {
     const [activeTab, setActiveTab] = useState<string>("All");
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
-
-
+    const [isExporting, setIsExporting] = useState(false);
+    
     const dynamicCategories = Array.from(new Set(transactions.map(t => t.category)));
     const categories: string[] = ["All", ...dynamicCategories];
 
@@ -67,10 +67,11 @@ export default function TransactionsPage() {
                 </div>
                 <button
                     onClick={handleDownloadPDF}
-                    disabled={filteredTransactions.length === 0}
+                    disabled={filteredTransactions.length === 0 || isExporting}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-medium transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed glass-gradient shadow-ambient"
                 >
-                    <Download className="w-4 h-4" /> Download PDF
+                    {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    {isExporting ? "Exporting..." : "Download PDF"}
                 </button>
             </header>
 
