@@ -44,6 +44,27 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     const [goals, setGoals] = useState<Goal[]>([]);
     const [loadingGoals, setLoadingGoals] = useState<boolean>(true);
 
+    // Re-fetch transactions after Gmail sync completes (triggered by GmailSyncCard)
+    useEffect(() => {
+        const handleGmailSync = () => {
+            if (!user) return;
+            const token = user.uid;
+            fetch("/api/transactions", { headers: { Authorization: `Bearer ${token}` } })
+                .then((r) => r.ok ? r.json() : null)
+                .then((data) => {
+                    if (!data) return;
+                    const txs = (data.transactions || []).map((t: { date: string | number | Date }) => ({
+                        ...t,
+                        date: new Date(t.date),
+                    }));
+                    setTransactions(txs);
+                })
+                .catch(console.error);
+        };
+        window.addEventListener("gmail-sync-complete", handleGmailSync);
+        return () => window.removeEventListener("gmail-sync-complete", handleGmailSync);
+    }, [user]);
+
     useEffect(() => {
         const fetchTransactionsAndGoals = async () => {
             if (!user) {
@@ -75,7 +96,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
                 if (goalsRes.ok) {
                     const data = await goalsRes.json();
-                    const fetchedGoals = (data.goals || []).map((g: any) => ({
+                    const fetchedGoals = (data.goals || []).map((g: { id: string; title: string; targetAmount: number; currentAmount: number; createdAt: string | number | Date }) => ({
                         ...g,
                         createdAt: new Date(g.createdAt)
                     }));

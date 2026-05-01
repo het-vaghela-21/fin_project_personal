@@ -14,8 +14,7 @@ import {
     Shield,
     Target,
     Menu,
-    X,
-    Wallet
+    X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -118,7 +117,7 @@ export const DashboardTopbar = memo(function DashboardTopbar() {
 
                     {/* Mobile Menu Toggle */}
                     <div className="lg:hidden flex items-center gap-2">
-                        {navItems.map((item) => {
+                        {navItems.map(() => {
                            // Show only 2 most important icons on mobile header to save space if needed
                            // But since it's a menu let's just leave the toggle
                            return null;

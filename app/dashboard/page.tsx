@@ -40,7 +40,7 @@ export default function DashboardPage() {
 
     const netWorthParts = formatCurrencyExt(totalBalance);
     const liquidParts = formatCurrencyExt(totalCredit);
-    const targetLiquidityPercentage = totalCredit > 0 ? 65 : 0; // Mock percentage placeholder as in design
+    // Mock percentage placeholder as in design would go here
 
     return (
         <div className="w-full flex flex-col gap-8">

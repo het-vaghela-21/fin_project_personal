@@ -16,8 +16,19 @@ export async function GET(req: NextRequest) {
         await connectMongo();
         const transactions = await Transaction.find({ userId: uid }).sort({ date: -1 }).lean();
 
-        // Map _id to id
-        type TransactionContext = { _id: { toString: () => string }; amount: number; type: string; category: string; title: string; date: Date };
+        // Map _id to id — include Gmail UPI metadata so the frontend can use them in charts/badges
+        type TransactionContext = {
+            _id: { toString: () => string };
+            amount: number;
+            type: string;
+            category: string;
+            title: string;
+            date: Date;
+            source?: string;
+            bankName?: string;
+            merchant?: string;
+            upiRef?: string;
+        };
         const mapped = transactions.map((t: TransactionContext) => ({
             id: t._id.toString(),
             amount: t.amount,
@@ -25,6 +36,10 @@ export async function GET(req: NextRequest) {
             category: t.category,
             title: t.title,
             date: t.date,
+            source: t.source ?? "manual",
+            bankName: t.bankName,
+            merchant: t.merchant,
+            upiRef: t.upiRef,
         }));
 
         return NextResponse.json(

@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useDashboard } from "@/components/DashboardProvider";
 import dynamic from "next/dynamic";
 import { format, subDays, subMonths, isAfter } from "date-fns";
-import { BarChart3, Clock, PieChart as PieChartIcon } from "lucide-react";
+import { BarChart3, Clock, PieChart as PieChartIcon, Smartphone } from "lucide-react";
 
 type TimeRange = "7D" | "1M" | "6M" | "1Y" | "ALL";
 
@@ -90,6 +90,7 @@ const DynamicPieChart = dynamic(
                         <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="var(--surface-container-lowest)" strokeWidth={2}>
                             {data.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                         </Pie>
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         <Tooltip formatter={(v: any) => `₹${Number(v).toFixed(2)}`} contentStyle={tooltipStyle} />
                     </PieChart>
                 </ResponsiveContainer>
@@ -131,6 +132,24 @@ export default function ChartsPage() {
         const grouped: Record<string, number> = {};
         filteredTransactions.forEach(t => { grouped[t.category] = (grouped[t.category] || 0) + t.amount; });
         return Object.entries(grouped).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+    }, [filteredTransactions]);
+
+    const upiRangeData = useMemo(() => {
+        const ranges: Record<string, number> = {
+            "₹10 - ₹500": 0,
+            "₹501 - ₹1000": 0,
+            "₹1001+": 0,
+        };
+        filteredTransactions.forEach(t => {
+            if (t.source === "gmail_upi" && t.type === "debit") {
+                if (t.amount >= 10 && t.amount <= 500) ranges["₹10 - ₹500"] += t.amount;
+                else if (t.amount >= 501 && t.amount <= 1000) ranges["₹501 - ₹1000"] += t.amount;
+                else if (t.amount >= 1001) ranges["₹1001+"] += t.amount;
+            }
+        });
+        return Object.entries(ranges)
+            .filter(([, value]) => value > 0)
+            .map(([name, value]) => ({ name, value }));
     }, [filteredTransactions]);
 
     const totalDebitForPeriod = filteredTransactions.reduce((acc, t) => t.type === "debit" ? acc + t.amount : acc, 0);
@@ -207,6 +226,28 @@ export default function ChartsPage() {
                                 <div key={entry.name} className="flex items-center justify-between p-2.5 rounded-xl transition-colors hover:bg-surface-variant/30">
                                     <div className="flex items-center gap-3">
                                         <div className="w-3.5 h-3.5 rounded-full ring-2 ring-surface-container-lowest" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                                        <span className="text-sm font-medium text-on-surface-variant hover:text-on-surface">{entry.name}</span>
+                                    </div>
+                                    <div className="text-sm font-bold text-on-surface">₹{entry.value.toFixed(2)}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="p-6 flex flex-col bg-surface-container-lowest ghost-border ambient-shadow rounded-[1.5rem]">
+                        <h2 className="text-xl font-bold text-on-surface flex items-center gap-2 mb-2">
+                            <Smartphone className="w-5 h-5 text-primary" /> UPI Payment Volumes
+                        </h2>
+                        <div className="h-[250px] w-full">
+                            {upiRangeData.length > 0
+                                ? <DynamicPieChart data={upiRangeData} />
+                                : <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-sm text-center">No UPI payments in this range.</div>}
+                        </div>
+                        <div className="space-y-3 mt-4">
+                            {upiRangeData.map((entry, index) => (
+                                <div key={entry.name} className="flex items-center justify-between p-2.5 rounded-xl transition-colors hover:bg-surface-variant/30">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-3.5 h-3.5 rounded-full ring-2 ring-surface-container-lowest" style={{ backgroundColor: COLORS[(index + 2) % COLORS.length] }} />
                                         <span className="text-sm font-medium text-on-surface-variant hover:text-on-surface">{entry.name}</span>
                                     </div>
                                     <div className="text-sm font-bold text-on-surface">₹{entry.value.toFixed(2)}</div>

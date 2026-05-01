@@ -2,17 +2,18 @@
 
 import { useState } from "react";
 import { useDashboard } from "@/components/DashboardProvider";
-import { ReceiptText, Trash2, ArrowUpRight, ArrowDownRight, Filter, Download, Loader2 } from "lucide-react";
+import { ReceiptText, Trash2, ArrowUpRight, ArrowDownRight, Filter, Download, Loader2, Mail } from "lucide-react";
 import { format, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { AddTransactionForm } from "@/components/dashboard/AddTransactionForm";
+import { GmailSyncCard } from "@/components/dashboard/GmailSyncCard";
 
 export default function TransactionsPage() {
     const { transactions, loadingTransactions, deleteTransaction } = useDashboard();
     const [activeTab, setActiveTab] = useState<string>("All");
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
-    const [isExporting, setIsExporting] = useState(false);
+
 
     const dynamicCategories = Array.from(new Set(transactions.map(t => t.category)));
     const categories: string[] = ["All", ...dynamicCategories];
@@ -73,8 +74,9 @@ export default function TransactionsPage() {
                 </button>
             </header>
 
-            {/* Add Transaction Section */}
-            <div className="w-full">
+            {/* Gmail Sync + Add Transaction Section */}
+            <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <GmailSyncCard />
                 <AddTransactionForm />
             </div>
 
@@ -148,12 +150,18 @@ export default function TransactionsPage() {
                                     </div>
                                     <div>
                                         <div className="text-on-surface font-semibold text-lg">{tx.title}</div>
-                                        <div className="flex items-center gap-3 text-sm mt-1">
+                                        <div className="flex items-center gap-3 text-sm mt-1 flex-wrap">
                                             <span className="text-on-surface-variant font-mono">{format(tx.date, "MMM dd, yyyy • hh:mm a")}</span>
                                             <span className="w-1.5 h-1.5 rounded-full bg-outline-variant" />
                                             <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-primary-container/30 border border-primary-container/50 text-primary">
                                                 {tx.category}
                                             </span>
+                                            {(tx as { source?: string }).source === "gmail_upi" && (
+                                                <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-surface-container border border-outline-variant/40 text-on-surface-variant flex items-center gap-1">
+                                                    <Mail className="w-2.5 h-2.5" />
+                                                    Gmail UPI
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

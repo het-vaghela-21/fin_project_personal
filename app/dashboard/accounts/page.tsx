@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useDashboard } from "@/components/DashboardProvider";
 import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip, YAxis } from "recharts";
 import { Wallet, Plus, ArrowUpRight, ArrowDownRight, Building2, Banknote, CreditCard, GraduationCap, Loader2 } from "lucide-react";
@@ -43,13 +43,13 @@ export default function AccountsPage() {
     const { transactions } = useDashboard();
     
     // In a real app, this would dynamically sum sub-accounts, but we'll use a mix of our dashboard balance + mock structure
-    const { totalBalance, totalCredit, totalDebit } = useMemo(() => {
+    const { totalBalance } = useMemo(() => {
         let credit = 0, debit = 0;
         for (const t of transactions) {
             if (t.type === "credit") credit += t.amount;
             else debit += t.amount;
         }
-        return { totalBalance: credit - debit, totalCredit: credit, totalDebit: debit };
+        return { totalBalance: credit - debit };
     }, [transactions]);
 
     return (
@@ -113,7 +113,8 @@ export default function AccountsPage() {
                                 contentStyle={{ backgroundColor: 'white', borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(6,78,59,0.1)' }}
                                 itemStyle={{ color: '#006c49', fontWeight: 600 }}
                                 cursor={{ stroke: '#a8cfbc', strokeWidth: 1, strokeDasharray: '4 4' }}
-                                formatter={(value: number) => [`₹${new Intl.NumberFormat('en-IN').format(value)}`, 'Net Worth']}
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                formatter={(value: any) => [`₹${new Intl.NumberFormat('en-IN').format(value)}`, 'Net Worth']}
                             />
                             <Area type="monotone" dataKey="netWorth" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#glowGradient)" activeDot={{ r: 6, fill: '#006c49', stroke: 'white', strokeWidth: 2 }} />
                         </AreaChart>
