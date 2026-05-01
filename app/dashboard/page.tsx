@@ -66,44 +66,47 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
                 
                 {/* Total Net Worth Card (Hero) */}
-                <div className="lg:col-span-8 bg-surface-container-lowest rounded-[2rem] p-8 lg:p-12 relative overflow-hidden ambient-shadow flex flex-col justify-between min-h-[400px] ghost-border">
-                    {/* Background Decorative Abstract 3D */}
+                <div className="lg:col-span-8 bg-surface-container-lowest rounded-[2rem] relative overflow-hidden ambient-shadow flex flex-col justify-between min-h-[400px] ghost-border">
+                    {/* Background Decorative Abstract 3D — right half only */}
                     <div 
-                        className="absolute right-0 top-0 w-2/3 h-full opacity-80 pointer-events-none" 
+                        className="absolute right-0 top-0 w-1/2 h-full pointer-events-none hero-image-blend" 
                         style={{ 
                             backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBjMjijCBBc6sB1jtCReNgOXowWUl7eicpEpeA91WUHoBEiumW5GN2nDZNVwFO8eaGAmlkM7GS0IiIF1Cxp9RCBUeikGdtL3ZYbUKAXrzKG5K4NcGS8h0hTsHIapLTIu5nkRs29fU8Y9MRa8UuAyvEAnox0F04QkWdEi0N_wmHaYVUx30Qij3m2hhad6ywEERA-jxlxheHGpFNXLSFlRalzwt_CY1_obmDr534Op_jMfwG3HMNmbw7xV1kAlJrKM835lxnDniyp2uY')", 
                             backgroundSize: 'cover', 
-                            backgroundPosition: 'center', 
-                            mixBlendMode: 'multiply' 
+                            backgroundPosition: 'center left'
                         }}
                     ></div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-surface-container-lowest via-surface-container-lowest/90 to-transparent pointer-events-none"></div>
-                    
-                    <div className="relative z-10">
-                        <span className="text-xs uppercase tracking-[0.1em] text-primary font-semibold mb-2 block">
-                            Total Net Worth
-                        </span>
-                        <h2 className={`text-5xl lg:text-6xl font-extrabold tracking-tighter mb-4 ${totalBalance < 0 ? 'text-error' : 'text-on-surface'}`}>
-                            {netWorthParts.sign}₹{netWorthParts.integerPart}
-                            <span className="text-3xl text-on-surface-variant">.{netWorthParts.decimalPart}</span>
-                        </h2>
-                        
-                        <div className="flex items-center gap-2 mt-4">
-                            <div className="bg-primary-container/20 text-primary-container px-3 py-1 rounded-full flex items-center gap-1 text-sm font-medium">
-                                <TrendingUp className="w-3.5 h-3.5" />
-                                All time
+                    {/* Gradient fade from card bg into the image */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-surface-container-lowest via-surface-container-lowest/95 to-surface-container-lowest/10 pointer-events-none"></div>
+
+                    {/* Content — constrained to left half so it never overlaps the image */}
+                    <div className="relative z-10 w-full max-w-[55%] p-8 lg:p-12 flex flex-col justify-between h-full min-h-[400px]">
+                        <div>
+                            <span className="text-xs uppercase tracking-[0.1em] text-primary font-semibold mb-2 block">
+                                Total Net Worth
+                            </span>
+                            <h2 className={`text-5xl lg:text-6xl font-extrabold tracking-tighter mb-4 ${totalBalance < 0 ? 'text-error' : 'text-on-surface'}`}>
+                                {netWorthParts.sign}₹{netWorthParts.integerPart}
+                                <span className="text-3xl text-on-surface-variant">.{netWorthParts.decimalPart}</span>
+                            </h2>
+
+                            <div className="flex items-center gap-2 mt-4">
+                                <div className="bg-primary-container/20 text-primary-container px-3 py-1 rounded-full flex items-center gap-1 text-sm font-medium">
+                                    <TrendingUp className="w-3.5 h-3.5" />
+                                    All time
+                                </div>
+                                <span className="text-sm text-on-surface-variant">Cashflow balance</span>
                             </div>
-                            <span className="text-sm text-on-surface-variant">Cashflow balance</span>
                         </div>
-                    </div>
-                    
-                    <div className="relative z-10 mt-12 flex gap-4">
-                        <Link href="/dashboard/charts" className="bg-secondary-container text-on-secondary-container px-5 py-2.5 rounded-xl font-medium hover:bg-secondary-container/80 transition-colors">
-                            Analytics
-                        </Link>
-                        <Link href="/dashboard/transactions" className="text-primary hover:bg-surface-container px-5 py-2.5 rounded-xl font-medium transition-colors">
-                            View Ledger
-                        </Link>
+
+                        <div className="mt-12 flex gap-4">
+                            <Link href="/dashboard/charts" className="bg-secondary-container text-on-secondary-container px-5 py-2.5 rounded-xl font-medium hover:bg-secondary-container/80 transition-colors">
+                                Analytics
+                            </Link>
+                            <Link href="/dashboard/transactions" className="text-primary hover:bg-surface-container px-5 py-2.5 rounded-xl font-medium transition-colors">
+                                View Ledger
+                            </Link>
+                        </div>
                     </div>
                 </div>
 

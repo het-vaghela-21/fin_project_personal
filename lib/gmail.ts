@@ -67,20 +67,26 @@ function buildGmailQuery(): string {
 
 // ─── OAuth2 Client ────────────────────────────────────────────────────────────
 
-export function getOAuthClient() {
+/**
+ * Returns an OAuth2 client.
+ * @param redirectUri  - The redirect URI to use (dynamically determined from request host).
+ *                       Falls back to GOOGLE_REDIRECT_URI env var if not provided.
+ */
+export function getOAuthClient(redirectUri?: string) {
     return new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_REDIRECT_URI
+        redirectUri ?? process.env.GOOGLE_REDIRECT_URI
     );
 }
 
 /**
  * Generates the Google OAuth consent URL.
  * Requests only gmail.readonly — no write access ever.
+ * @param redirectUri - The redirect URI to embed in the auth URL (must match Google Cloud config).
  */
-export function getAuthUrl(): string {
-    const oauth2Client = getOAuthClient();
+export function getAuthUrl(redirectUri: string): string {
+    const oauth2Client = getOAuthClient(redirectUri);
     return oauth2Client.generateAuthUrl({
         access_type: "offline",
         prompt: "consent",          // Always show consent + get refresh_token

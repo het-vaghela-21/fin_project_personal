@@ -23,7 +23,12 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        const oauth2Client = getOAuthClient();
+        // Reconstruct the EXACT same redirect URI that was used in /api/gmail/connect.
+        // Google requires redirect_uri to match at token exchange time.
+        const origin = req.nextUrl.origin;
+        const redirectUri = `${origin}/api/gmail/callback`;
+
+        const oauth2Client = getOAuthClient(redirectUri);
         const { tokens } = await oauth2Client.getToken(code);
 
         if (!tokens.access_token || !tokens.refresh_token) {

@@ -57,6 +57,34 @@ export default function TransactionsPage() {
 
     return (
         <div className="w-full max-w-7xl mx-auto space-y-8 relative z-10 pb-20">
+
+            {/* ── Download PDF button shimmer animation ── */}
+            <style>{`
+                @keyframes pdf-shimmer {
+                    0%   { transform: translateX(-110%) skewX(-15deg); }
+                    100% { transform: translateX(220%)  skewX(-15deg); }
+                }
+                .pdf-btn::before {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.28) 50%, transparent 100%);
+                    transform: translateX(-110%) skewX(-15deg);
+                    transition: none;
+                    border-radius: inherit;
+                    pointer-events: none;
+                }
+                .pdf-btn:hover::before {
+                    animation: pdf-shimmer 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                }
+                .pdf-btn:hover .pdf-icon {
+                    transform: translateY(2px);
+                }
+                .pdf-icon {
+                    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+                }
+            `}</style>
+
             {/* Header */}
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -65,13 +93,32 @@ export default function TransactionsPage() {
                     </h1>
                     <p className="text-on-surface-variant mt-0.5">Search, filter, export or add new cashflow entries.</p>
                 </div>
+
                 <button
                     onClick={handleDownloadPDF}
                     disabled={filteredTransactions.length === 0 || isExporting}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-medium transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed glass-gradient shadow-ambient"
+                    className="pdf-btn relative overflow-hidden flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
+                    style={{
+                        background: "linear-gradient(135deg, var(--primary), var(--primary-container))",
+                        color: "var(--on-primary)",
+                        boxShadow: "0 4px 20px -4px color-mix(in srgb, var(--primary) 50%, transparent)",
+                    }}
+                    onMouseEnter={e => {
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                            "0 8px 28px -4px color-mix(in srgb, var(--primary) 70%, transparent), 0 0 0 2px color-mix(in srgb, var(--primary-container) 40%, transparent)";
+                        (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
+                    }}
+                    onMouseLeave={e => {
+                        (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                            "0 4px 20px -4px color-mix(in srgb, var(--primary) 50%, transparent)";
+                        (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
+                    }}
                 >
-                    {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                    {isExporting ? "Exporting..." : "Download PDF"}
+                    {isExporting
+                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                        : <Download className="pdf-icon w-4 h-4" />
+                    }
+                    {isExporting ? "Generating…" : "Download PDF"}
                 </button>
             </header>
 

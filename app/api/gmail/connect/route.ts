@@ -14,8 +14,13 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        const authUrl = getAuthUrl();
-        // Return URL to the client — client will do the redirect
+        // Dynamically build the redirect URI from the current request's origin.
+        // This works in both localhost dev and Render production without any
+        // extra env variables.
+        const origin = req.nextUrl.origin;
+        const redirectUri = `${origin}/api/gmail/callback`;
+
+        const authUrl = getAuthUrl(redirectUri);
         return NextResponse.json({ authUrl });
     } catch (e) {
         const err = e as Error;

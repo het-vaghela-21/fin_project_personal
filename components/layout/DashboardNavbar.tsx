@@ -63,10 +63,19 @@ export const DashboardNavbar = memo(function DashboardNavbar() {
                                     : "text-on-surface-variant hover:text-on-surface border-transparent hover:bg-surface-variant hover:border-outline/20"
                             )}
                         >
-                            {/* Active bottom border indicator */}
-                            {isActive && (
-                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 rounded-t-full"
-                                    style={{ background: "linear-gradient(to right, var(--primary), var(--tertiary))" }} />
+                            {/* Active bottom pill — full width */}
+                            {isActive ? (
+                                <div
+                                    className="absolute bottom-0 left-0 w-full h-[2.5px] rounded-t-full"
+                                    style={{ background: "linear-gradient(to right, var(--primary), var(--tertiary))" }}
+                                />
+                            ) : (
+                                /* Hover underline: transition-transform is set directly so no style-jsx needed */
+                                <span
+                                    aria-hidden="true"
+                                    className="absolute bottom-0 left-0 w-full h-[2.5px] rounded-t-full origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out"
+                                    style={{ background: "linear-gradient(to right, var(--primary), var(--primary-container))" }}
+                                />
                             )}
 
                             <item.icon className={cn("w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 transition-colors", isActive ? "text-primary" : "text-on-surface-variant group-hover:text-on-surface")} />
@@ -119,14 +128,9 @@ export const DashboardNavbar = memo(function DashboardNavbar() {
                     <LogOut className="w-5 h-5 flex-shrink-0" />
                 </button>
             </div>
-            <style jsx>{`
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-                .no-scrollbar {
-                    -ms-overflow-style: none;  /* IE and Edge */
-                    scrollbar-width: none;  /* Firefox */
-                }
+            <style>{`
+                .no-scrollbar::-webkit-scrollbar { display: none; }
+                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
             `}</style>
         </header>
     );

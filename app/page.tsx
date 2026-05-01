@@ -531,7 +531,7 @@ export default function Home() {
               ))}
             </ul>
             <Link
-              href="/auth/register"
+              href="/coming-soon"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-white font-semibold text-sm transition-all hover:scale-105"
               style={{
                 background: "linear-gradient(135deg, #7C3AED, #22D3EE)",
