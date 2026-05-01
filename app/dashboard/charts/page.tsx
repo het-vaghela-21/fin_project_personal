@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useMemo } from "react";
@@ -70,7 +71,7 @@ const DynamicLineChart = dynamic(
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(150,150,200,0.1)" vertical={false} />
                         <XAxis dataKey="date" stroke="var(--on-surface-variant)" fontSize={11} tickLine={false} axisLine={false} />
                         <YAxis stroke="var(--on-surface-variant)" fontSize={11} tickFormatter={v => `₹${v}`} tickLine={false} axisLine={false} width={70} />
-                        <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`₹${v.toFixed(2)}`]} />
+                        <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`₹${Number(v).toFixed(2)}`]} />
                         <Legend iconType="circle" wrapperStyle={{ fontSize: "12px", paddingTop: "12px" }} />
                         <Line
                             type="monotone" dataKey="credit" name="Credit"
@@ -117,7 +118,7 @@ const DynamicBarChart = dynamic(
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(150,150,200,0.1)" vertical={false} />
                         <XAxis dataKey="date" stroke="var(--on-surface-variant)" fontSize={11} tickLine={false} axisLine={false} />
                         <YAxis stroke="var(--on-surface-variant)" fontSize={11} tickFormatter={v => `₹${v}`} tickLine={false} axisLine={false} width={70} />
-                        <Tooltip cursor={{ fill: "rgba(150,150,200,0.05)" }} contentStyle={tooltipStyle} formatter={(v: number) => [`₹${v.toFixed(2)}`]} />
+                        <Tooltip cursor={{ fill: "rgba(150,150,200,0.05)" }} contentStyle={tooltipStyle} formatter={(v: any) => [`₹${Number(v).toFixed(2)}`]} />
                         <Legend iconType="circle" wrapperStyle={{ fontSize: "12px", paddingTop: "12px" }} />
                         <Bar dataKey="credit" name="Credit" fill="url(#barCredit)" radius={[6, 6, 0, 0]} barSize={14}
                             isAnimationActive={true} animationBegin={300} animationDuration={1000} />
@@ -162,7 +163,7 @@ const DynamicPieChart = dynamic(
                             ))}
                         </Pie>
                         <Tooltip
-                            formatter={(v: number) => [`₹${v.toFixed(2)}`]}
+                            formatter={(v: any) => [`₹${Number(v).toFixed(2)}`]}
                             contentStyle={tooltipStyle}
                         />
                     </PieChart>
@@ -338,7 +339,7 @@ export default function ChartsPage() {
                                         className="flex items-center justify-between px-3 py-2 rounded-xl transition-colors hover:bg-surface-variant/30 group">
                                         <div className="flex items-center gap-3">
                                             <div className="w-3 h-3 rounded-full flex-shrink-0 ring-2 ring-offset-1 ring-offset-surface-container-lowest"
-                                                style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length], ringColor: PIE_COLORS[index % PIE_COLORS.length] }} />
+                                                style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length], '--tw-ring-color': PIE_COLORS[index % PIE_COLORS.length] } as any} />
                                             <span className="text-sm font-medium text-on-surface-variant group-hover:text-on-surface transition-colors">{entry.name}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
