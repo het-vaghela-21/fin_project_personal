@@ -13,6 +13,11 @@ export interface Transaction {
     category: TransactionCategory;
     date: Date;
     title: string;
+    // Gmail UPI fields — optional, only present on auto-imported transactions
+    source?: "manual" | "gmail_upi";
+    bankName?: string;
+    merchant?: string;
+    upiRef?: string;
 }
 
 export interface Goal {
