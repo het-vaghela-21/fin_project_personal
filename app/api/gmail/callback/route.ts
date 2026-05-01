@@ -25,7 +25,10 @@ export async function GET(req: NextRequest) {
     try {
         // Reconstruct the EXACT same redirect URI that was used in /api/gmail/connect.
         // Google requires redirect_uri to match at token exchange time.
-        const origin = req.nextUrl.origin;
+        let origin = req.nextUrl.origin;
+        if (req.headers.get("x-forwarded-proto") === "https" || origin.includes("onrender.com")) {
+            origin = origin.replace("http://", "https://");
+        }
         const redirectUri = `${origin}/api/gmail/callback`;
 
         const oauth2Client = getOAuthClient(redirectUri);

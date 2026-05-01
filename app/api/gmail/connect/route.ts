@@ -17,7 +17,10 @@ export async function GET(req: NextRequest) {
         // Dynamically build the redirect URI from the current request's origin.
         // This works in both localhost dev and Render production without any
         // extra env variables.
-        const origin = req.nextUrl.origin;
+        let origin = req.nextUrl.origin;
+        if (req.headers.get("x-forwarded-proto") === "https" || origin.includes("onrender.com")) {
+            origin = origin.replace("http://", "https://");
+        }
         const redirectUri = `${origin}/api/gmail/callback`;
 
         const authUrl = getAuthUrl(redirectUri);
