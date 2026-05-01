@@ -100,7 +100,7 @@ export function ParticlesBackground() {
       particles: {
         ...baseOptions.particles,
         number: { density: { enable: true }, value: 30 },
-        move: { ...baseOptions.particles?.move, speed: 0.5 },
+        move: { ...(baseOptions.particles?.move as any), speed: 0.5 },
       }
     };
   } else if (pathname?.includes("/dashboard/goals")) {
@@ -109,9 +109,9 @@ export function ParticlesBackground() {
       ...baseOptions,
       particles: {
         ...baseOptions.particles,
-        links: { ...baseOptions.particles?.links, enable: false }, // Disable links for bubbles
+        links: { ...(baseOptions.particles?.links as any), enable: false }, // Disable links for bubbles
         move: { 
-            ...baseOptions.particles?.move, 
+            ...(baseOptions.particles?.move as any), 
             direction: "top", 
             speed: 1.5,
             outModes: { default: "out" }
@@ -130,7 +130,7 @@ export function ParticlesBackground() {
         shape: { type: ["circle", "triangle", "edge"] },
         number: { density: { enable: true }, value: 60 },
         move: {
-            ...baseOptions.particles?.move,
+            ...(baseOptions.particles?.move as any),
             speed: 1.2,
         }
       }
