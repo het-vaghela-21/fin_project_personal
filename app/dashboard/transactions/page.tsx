@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useDashboard } from "@/components/DashboardProvider";
-import { ReceiptText, Trash2, ArrowUpRight, ArrowDownRight, Filter, Download, Loader2, Mail, ScanLine } from "lucide-react";
+import { ReceiptText, Trash2, ArrowUpRight, ArrowDownRight, Filter, Download, Loader2, Mail, ScanLine, MessageSquare } from "lucide-react";
 import { format, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { AddTransactionForm } from "@/components/dashboard/AddTransactionForm";
@@ -218,6 +218,12 @@ export default function TransactionsPage() {
                                                 <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-surface-container border border-outline-variant/40 text-on-surface-variant flex items-center gap-1">
                                                     <ScanLine className="w-2.5 h-2.5" />
                                                     Scanned bill
+                                                </span>
+                                            )}
+                                            {tx.source === "sms" && (
+                                                <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-surface-container border border-outline-variant/40 text-on-surface-variant flex items-center gap-1">
+                                                    <MessageSquare className="w-2.5 h-2.5" />
+                                                    Bank SMS
                                                 </span>
                                             )}
                                         </div>

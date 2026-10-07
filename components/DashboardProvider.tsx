@@ -14,7 +14,7 @@ export interface Transaction {
     date: Date;
     title: string;
     // Gmail UPI fields — optional, only present on auto-imported transactions
-    source?: "manual" | "gmail_upi" | "bill_scan";
+    source?: "manual" | "gmail_upi" | "bill_scan" | "sms";
     bankName?: string;
     merchant?: string;
     upiRef?: string;
