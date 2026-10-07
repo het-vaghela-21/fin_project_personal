@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useDashboard } from "@/components/DashboardProvider";
-import { ReceiptText, Trash2, ArrowUpRight, ArrowDownRight, Filter, Download, Loader2, Mail } from "lucide-react";
+import { ReceiptText, Trash2, ArrowUpRight, ArrowDownRight, Filter, Download, Loader2, Mail, ScanLine } from "lucide-react";
 import { format, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { AddTransactionForm } from "@/components/dashboard/AddTransactionForm";
 import { GmailSyncCard } from "@/components/dashboard/GmailSyncCard";
+import { BillScanCard } from "@/components/dashboard/BillScanCard";
 
 export default function TransactionsPage() {
     const { transactions, loadingTransactions, deleteTransaction } = useDashboard();
@@ -128,6 +129,9 @@ export default function TransactionsPage() {
                 <AddTransactionForm />
             </div>
 
+            {/* Bill / Receipt Scanner */}
+            <BillScanCard />
+
             {/* Date Filters & Category Tabs */}
             <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 {/* Date */}
@@ -208,6 +212,12 @@ export default function TransactionsPage() {
                                                 <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-surface-container border border-outline-variant/40 text-on-surface-variant flex items-center gap-1">
                                                     <Mail className="w-2.5 h-2.5" />
                                                     Gmail UPI
+                                                </span>
+                                            )}
+                                            {tx.source === "bill_scan" && (
+                                                <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-surface-container border border-outline-variant/40 text-on-surface-variant flex items-center gap-1">
+                                                    <ScanLine className="w-2.5 h-2.5" />
+                                                    Scanned bill
                                                 </span>
                                             )}
                                         </div>

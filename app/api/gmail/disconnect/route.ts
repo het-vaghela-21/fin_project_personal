@@ -5,21 +5,16 @@
  * - Revokes the access token at Google's server.
  * - Clears all gmailSync data from MongoDB.
  *
- * Auth: Bearer <firebase_uid>
+ * Auth: Bearer <firebase_id_token>
  */
 import { NextRequest, NextResponse } from "next/server";
 import { connectMongo } from "@/lib/mongodb";
 import { User } from "@/models/User";
 import { getOAuthClient, getAuthClientForUser } from "@/lib/gmail";
-
-const verifyAuth = (req: NextRequest) => {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) return null;
-    return authHeader.split(" ")[1];
-};
+import { verifyAuth } from "@/lib/verifyAuth";
 
 export async function DELETE(req: NextRequest) {
-    const uid = verifyAuth(req);
+    const uid = await verifyAuth(req);
     if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {

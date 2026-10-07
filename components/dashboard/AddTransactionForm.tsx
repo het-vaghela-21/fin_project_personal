@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useDashboard, TransactionType } from "@/components/DashboardProvider";
 import { PlusCircle, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { CREDIT_CATEGORIES, DEBIT_CATEGORIES } from "@/lib/categories";
 
 export function AddTransactionForm() {
     const { addTransaction } = useDashboard();
@@ -12,8 +13,8 @@ export function AddTransactionForm() {
     const [category, setCategory] = useState<string>("Food");
     const [type, setType] = useState<TransactionType>("debit");
 
-    const debitCategories = ["Food", "Shopping", "Jewellery", "Travel", "Utilities", "Health", "Miscellaneous"];
-    const creditCategories = ["Salary", "Freelance", "Investments", "Refunds", "Gifts", "Other Income"];
+    const debitCategories: readonly string[] = DEBIT_CATEGORIES;
+    const creditCategories: readonly string[] = CREDIT_CATEGORIES;
 
     const currentCategories = type === "credit" ? creditCategories : debitCategories;
 

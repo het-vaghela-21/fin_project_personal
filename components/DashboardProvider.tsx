@@ -14,7 +14,7 @@ export interface Transaction {
     date: Date;
     title: string;
     // Gmail UPI fields — optional, only present on auto-imported transactions
-    source?: "manual" | "gmail_upi";
+    source?: "manual" | "gmail_upi" | "bill_scan";
     bankName?: string;
     merchant?: string;
     upiRef?: string;
@@ -28,11 +28,17 @@ export interface Goal {
     createdAt: Date;
 }
 
+export type ScanBillResult =
+    | { success: true; transaction: Transaction; summary: string }
+    | { success: false; error: string };
+
 interface DashboardContextType {
     transactions: Transaction[];
     loadingTransactions: boolean;
     addTransaction: (tx: Omit<Transaction, 'id'>) => Promise<{ success: boolean; error?: string }>;
     deleteTransaction: (id: string) => Promise<void>;
+    scanBill: (file: File) => Promise<ScanBillResult>;
+    updateTransactionCategory: (id: string, category: string) => Promise<boolean>;
     goals: Goal[];
     loadingGoals: boolean;
     addGoal: (goal: Omit<Goal, 'id' | 'currentAmount' | 'createdAt'>) => Promise<void>;
@@ -51,9 +57,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
     // Re-fetch transactions after Gmail sync completes (triggered by GmailSyncCard)
     useEffect(() => {
-        const handleGmailSync = () => {
+        const handleGmailSync = async () => {
             if (!user) return;
-            const token = user.uid;
+            const token = await user.getIdToken();
             fetch("/api/transactions", { headers: { Authorization: `Bearer ${token}` } })
                 .then((r) => r.ok ? r.json() : null)
                 .then((data) => {
@@ -82,7 +88,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
             try {
                 setLoadingTransactions(true);
                 setLoadingGoals(true);
-                const token = user.uid;
+                const token = await user.getIdToken();
                 const [txRes, goalsRes] = await Promise.all([
                     fetch("/api/transactions", { headers: { 'Authorization': `Bearer ${token}` } }),
                     fetch("/api/goals", { headers: { 'Authorization': `Bearer ${token}` } })
@@ -123,7 +129,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     const addTransaction = async (tx: Omit<Transaction, 'id'>): Promise<{ success: boolean; error?: string }> => {
         if (!user) return { success: false, error: "Not logged in" };
         try {
-            const token = user.uid;
+            const token = await user.getIdToken();
             const res = await fetch("/api/transactions", {
                 method: "POST",
                 headers: {
@@ -160,7 +166,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     const deleteTransaction = async (id: string) => {
         if (!user) return;
         try {
-            const token = user.uid;
+            const token = await user.getIdToken();
             const res = await fetch(`/api/transactions/${id}`, {
                 method: "DELETE",
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -173,10 +179,55 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const scanBill = async (file: File): Promise<ScanBillResult> => {
+        if (!user) return { success: false, error: "Not logged in" };
+        try {
+            const token = await user.getIdToken();
+            const body = new FormData();
+            body.append("file", file);
+            const res = await fetch("/api/transactions/scan", {
+                method: "POST",
+                headers: { 'Authorization': `Bearer ${token}` },
+                body
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) return { success: false, error: data.error || "Upload failed" };
+
+            const newTx: Transaction = { ...data.transaction, date: new Date(data.transaction.date) };
+            setTransactions(prev => [newTx, ...prev].sort((a, b) => b.date.getTime() - a.date.getTime()));
+            return { success: true, transaction: newTx, summary: data.summary ?? "" };
+        } catch (err) {
+            console.error("Error scanning bill:", err);
+            return { success: false, error: (err as Error).message };
+        }
+    };
+
+    const updateTransactionCategory = async (id: string, category: string): Promise<boolean> => {
+        if (!user) return false;
+        try {
+            const token = await user.getIdToken();
+            const res = await fetch(`/api/transactions/${id}`, {
+                method: "PATCH",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ category })
+            });
+            if (res.ok) {
+                setTransactions(prev => prev.map(t => t.id === id ? { ...t, category } : t));
+            }
+            return res.ok;
+        } catch (err) {
+            console.error("Error updating transaction:", err);
+            return false;
+        }
+    };
+
     const addGoal = async (goal: Omit<Goal, 'id' | 'currentAmount' | 'createdAt'>) => {
         if (!user) return;
         try {
-            const token = user.uid;
+            const token = await user.getIdToken();
             const res = await fetch("/api/goals", {
                 method: "POST",
                 headers: {
@@ -201,7 +252,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     const addFundsToGoal = async (id: string, amountToAdd: number) => {
         if (!user) return;
         try {
-            const token = user.uid;
+            const token = await user.getIdToken();
             const res = await fetch(`/api/goals/${id}`, {
                 method: "PATCH",
                 headers: {
@@ -222,7 +273,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     const deleteGoal = async (id: string) => {
         if (!user) return;
         try {
-            const token = user.uid;
+            const token = await user.getIdToken();
             const res = await fetch(`/api/goals/${id}`, {
                 method: "DELETE",
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -237,7 +288,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
     return (
         <DashboardContext.Provider value={{
-            transactions, loadingTransactions, addTransaction, deleteTransaction,
+            transactions, loadingTransactions, addTransaction, deleteTransaction, scanBill, updateTransactionCategory,
             goals, loadingGoals, addGoal, addFundsToGoal, deleteGoal
         }}>
             {children}

@@ -73,7 +73,7 @@ export function GmailSyncCard() {
         if (!user) return;
         try {
             const res = await fetch("/api/gmail/status", {
-                headers: { Authorization: `Bearer ${user.uid}` },
+                headers: { Authorization: `Bearer ${await user.getIdToken()}` },
             });
             if (res.ok) {
                 const data = await res.json();
@@ -114,7 +114,7 @@ export function GmailSyncCard() {
         setError(null);
         try {
             const res = await fetch("/api/gmail/connect", {
-                headers: { Authorization: `Bearer ${user.uid}` },
+                headers: { Authorization: `Bearer ${await user.getIdToken()}` },
             });
             const data = await res.json();
             if (data.authUrl) {
@@ -141,7 +141,7 @@ export function GmailSyncCard() {
         try {
             const res = await fetch("/api/gmail/sync", {
                 method: "POST",
-                headers: { Authorization: `Bearer ${user.uid}` },
+                headers: { Authorization: `Bearer ${await user.getIdToken()}` },
             });
             const data = await res.json();
             if (!res.ok) {
@@ -169,7 +169,7 @@ export function GmailSyncCard() {
         try {
             const res = await fetch("/api/gmail/disconnect", {
                 method: "DELETE",
-                headers: { Authorization: `Bearer ${user.uid}` },
+                headers: { Authorization: `Bearer ${await user.getIdToken()}` },
             });
             if (res.ok) {
                 setStatus({ connected: false, lastSyncAt: null, syncedCount: 0 });

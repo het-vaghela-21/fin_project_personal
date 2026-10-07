@@ -2,11 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectMongo } from "@/lib/mongodb";
 import { User } from "@/models/User";
 import { Transaction } from "@/models/Transaction";
+import { isAdminRequest } from "@/lib/verifyAuth";
 
 export async function GET(req: NextRequest) {
-    // Verify admin secret header
+    // Two accepted proofs of admin identity:
+    //  1. A verified Firebase ID token belonging to ADMIN_EMAIL. Preferred, and the
+    //     only one used by the Android app — a mobile client cannot hold a shared
+    //     secret, since anything shipped in the APK can be extracted from it.
+    //  2. The x-admin-secret header, kept so the existing web console keeps working.
     const adminSecret = req.headers.get("x-admin-secret");
-    if (adminSecret !== process.env.ADMIN_SECRET) {
+    const secretMatches =
+        Boolean(process.env.ADMIN_SECRET) && adminSecret === process.env.ADMIN_SECRET;
+
+    if (!secretMatches && !(await isAdminRequest(req))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

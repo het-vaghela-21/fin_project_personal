@@ -5,7 +5,7 @@
  * - Fully idempotent: won't create duplicates (gmailMessageId dedup).
  * - Returns summary of synced/skipped/failed emails.
  *
- * Auth: Bearer <firebase_uid>
+ * Auth: Bearer <firebase_id_token>
  */
 import { NextRequest, NextResponse } from "next/server";
 import { connectMongo } from "@/lib/mongodb";
@@ -13,15 +13,10 @@ import { User } from "@/models/User";
 import { Transaction } from "@/models/Transaction";
 import { fetchUpiEmails } from "@/lib/gmail";
 import { parseUpiEmail } from "@/lib/upiParser";
-
-const verifyAuth = (req: NextRequest) => {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) return null;
-    return authHeader.split(" ")[1];
-};
+import { verifyAuth } from "@/lib/verifyAuth";
 
 export async function POST(req: NextRequest) {
-    const uid = verifyAuth(req);
+    const uid = await verifyAuth(req);
     if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {

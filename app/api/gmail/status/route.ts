@@ -4,20 +4,15 @@
  * Returns the Gmail sync status for the current user.
  * Used by the UI to show connect/sync state.
  *
- * Auth: Bearer <firebase_uid>
+ * Auth: Bearer <firebase_id_token>
  */
 import { NextRequest, NextResponse } from "next/server";
 import { connectMongo } from "@/lib/mongodb";
 import { User } from "@/models/User";
-
-const verifyAuth = (req: NextRequest) => {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) return null;
-    return authHeader.split(" ")[1];
-};
+import { verifyAuth } from "@/lib/verifyAuth";
 
 export async function GET(req: NextRequest) {
-    const uid = verifyAuth(req);
+    const uid = await verifyAuth(req);
     if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {

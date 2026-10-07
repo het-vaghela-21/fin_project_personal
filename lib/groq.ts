@@ -9,12 +9,21 @@ export const GROQ_MODEL_FALLBACK_CHAIN = [
     "qwen/qwen3.8-27b",
 ];
 
-export type GroqMessage = { role: "system" | "user" | "assistant"; content: string };
+// Groq model that accepts image input (used for bill/receipt scanning).
+export const GROQ_VISION_MODEL = "qwen/qwen3.8-27b";
+
+export type GroqContentPart =
+    | { type: "text"; text: string }
+    | { type: "image_url"; image_url: { url: string } };
+
+export type GroqMessage = { role: "system" | "user" | "assistant"; content: string | GroqContentPart[] };
 
 type GroqOptions = {
     temperature?: number;
     json?: boolean;
     maxTokens?: number;
+    /** Use only this model instead of the fallback chain (e.g. for image input). */
+    model?: string;
 };
 
 export class GroqError extends Error {
@@ -41,6 +50,8 @@ async function callGroq(model: string, messages: GroqMessage[], opts: GroqOption
             temperature: opts.temperature ?? 0.7,
             max_completion_tokens: opts.maxTokens ?? 2048,
             ...(opts.json ? { response_format: { type: "json_object" } } : {}),
+            // Qwen models emit their reasoning inline unless told to hide it.
+            ...(model.startsWith("qwen/") ? { reasoning_format: "hidden" } : {}),
         }),
     });
 
@@ -61,7 +72,7 @@ async function callGroq(model: string, messages: GroqMessage[], opts: GroqOption
 export async function groqChat(messages: GroqMessage[], opts: GroqOptions = {}, tag = "Groq"): Promise<string> {
     let lastError: unknown = null;
 
-    for (const model of GROQ_MODEL_FALLBACK_CHAIN) {
+    for (const model of opts.model ? [opts.model] : GROQ_MODEL_FALLBACK_CHAIN) {
         try {
             console.log(`[${tag}] Trying model: ${model}`);
             const text = await callGroq(model, messages, opts);

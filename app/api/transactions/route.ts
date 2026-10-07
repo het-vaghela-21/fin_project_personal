@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectMongo } from "@/lib/mongodb";
 import { Transaction } from "@/models/Transaction";
-
-const verifyAuth = (req: NextRequest) => {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) return null;
-    return authHeader.split(" ")[1];
-};
+import { verifyAuth } from "@/lib/verifyAuth";
 
 export async function GET(req: NextRequest) {
-    const uid = verifyAuth(req);
+    const uid = await verifyAuth(req);
     if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {
@@ -58,7 +53,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    const uid = verifyAuth(req);
+    const uid = await verifyAuth(req);
     if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {
