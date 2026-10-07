@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { adminAuth } from "@/lib/firebaseAdmin";
+import { getAdminAuth } from "@/lib/firebaseAdmin";
 
 export interface VerifiedCaller {
     uid: string;
@@ -18,7 +18,7 @@ export async function verifyCaller(req: NextRequest): Promise<VerifiedCaller | n
     if (!idToken) return null;
 
     try {
-        const decoded = await adminAuth.verifyIdToken(idToken);
+        const decoded = await getAdminAuth().verifyIdToken(idToken);
         return { uid: decoded.uid, email: (decoded.email ?? "").toLowerCase() };
     } catch (err) {
         console.error("[verifyAuth] token rejected:", (err as Error).message);
