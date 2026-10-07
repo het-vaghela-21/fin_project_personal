@@ -60,7 +60,7 @@ export default function AISuggestionsPage() {
     const [insightError, setInsightError] = useState("");
     const [retryCountdown, setRetryCountdown] = useState(0);
     const [chatHistory, setChatHistory] = useState<{ role: "ai" | "user"; content: string }[]>([
-        { role: "ai", content: "Hello! I'm your embedded financial AI powered by Gemini 2.0 Flash. I have full read access to your transactions matrix. Want me to analyze your latest spending trends or suggest a budget?" }
+        { role: "ai", content: "Hello! I'm your embedded financial AI powered by Groq. I have full read access to your transactions matrix. Want me to analyze your latest spending trends or suggest a budget?" }
     ]);
     const [chatLoading, setChatLoading] = useState(false);
     const chatEndRef = useRef<HTMLDivElement>(null);
@@ -145,7 +145,7 @@ export default function AISuggestionsPage() {
                 </div>
                 <div className="px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 bg-primary-container text-on-primary-container border border-primary/20 shadow-sm animate-in fade-in zoom-in duration-500">
                     <div className="w-2 h-2 rounded-full animate-pulse bg-primary" />
-                    Gemini 2.0 Active
+                    Groq AI Active
                 </div>
             </header>
 

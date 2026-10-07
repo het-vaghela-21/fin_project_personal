@@ -4,14 +4,14 @@
  * Parses UPI transaction alert emails from Indian banks.
  * Strategy:
  *   1. Try bank-specific regex patterns (fast, reliable).
- *   2. If no match → fallback to Gemini AI structured extraction.
+ *   2. If no match → fallback to Groq AI structured extraction.
  *
  * Supported Banks / Apps:
  *   HDFC, ICICI, SBI, Axis, Kotak, PNB, IndusInd, Yes Bank, IDFC First,
  *   Paytm, PhonePe, Google Pay, Amazon Pay, Airtel Payments Bank, Federal Bank.
  */
 
-import { GoogleGenAI } from "@google/genai";
+import { groqChat } from "./groq";
 import type { RawEmailData } from "@/lib/gmail";
 
 // ─── Output interface ─────────────────────────────────────────────────────────
@@ -241,9 +241,9 @@ const BANK_PATTERNS: BankPattern[] = [
     },
 ];
 
-// ─── Gemini AI Fallback ───────────────────────────────────────────────────────
+// ─── Groq AI Fallback ─────────────────────────────────────────────────────────
 
-const GEMINI_SYSTEM_PROMPT = `You are a financial data extraction assistant specializing in Indian UPI bank transaction alert emails.
+const AI_SYSTEM_PROMPT = `You are a financial data extraction assistant specializing in Indian UPI bank transaction alert emails.
 
 Extract transaction information from the email text and respond ONLY with valid JSON (no markdown, no explanation).
 
@@ -263,29 +263,25 @@ Rules:
 - If you cannot determine type or amount, return null instead of JSON
 - NEVER include markdown code blocks in response`;
 
-async function parseWithGemini(
+async function parseWithAI(
     subject: string,
     body: string
 ): Promise<Partial<ParsedUPITransaction> | null> {
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+        if (!process.env.GROQ_API_KEY) return null;
         const truncatedBody = body.slice(0, 1500); // Keep prompt concise
 
-        const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
-            contents: [
-                {
-                    role: "user",
-                    parts: [
-                        {
-                            text: `${GEMINI_SYSTEM_PROMPT}\n\nEmail Subject: ${subject}\n\nEmail Body:\n${truncatedBody}`,
-                        },
-                    ],
-                },
-            ],
-        });
+        const rawText = await groqChat(
+            [
+                { role: "system", content: AI_SYSTEM_PROMPT },
+                { role: "user", content: `Email Subject: ${subject}
 
-        const rawText = response.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+Email Body:
+${truncatedBody}` },
+            ],
+            { temperature: 0 },
+            "UPIParser"
+        );
         const cleaned = rawText.replace(/```json|```/g, "").trim();
 
         if (cleaned === "null" || !cleaned) return null;
@@ -330,9 +326,9 @@ export async function parseUpiEmail(
         }
     }
 
-    // Fallback to Gemini if regex didn't work
+    // Fallback to Groq AI if regex didn't work
     if (!partial) {
-        partial = await parseWithGemini(subject, body);
+        partial = await parseWithAI(subject, body);
     }
 
     if (!partial || !partial.type || !partial.amount) return null;

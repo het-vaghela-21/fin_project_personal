@@ -17,7 +17,6 @@ const nextConfig = {
             'recharts',
             'date-fns',
             'framer-motion',
-            '@google/genai',
             'firebase',
             'firebase-admin',
         ],
