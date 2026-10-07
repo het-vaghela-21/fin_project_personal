@@ -74,8 +74,9 @@ Valid values for border: "border-red-500/20", "border-green-500/20", "border-yel
                 { status: 429 }
             );
         }
+        // Raw provider errors ("Groq 400: ...") mean nothing to users; details stay in the log.
         return NextResponse.json(
-            { error: e?.message?.substring(0, 300) || "An error occurred during AI processing." },
+            { error: "The AI couldn't analyse your transactions right now. Please tap retry in a moment." },
             { status: 500 }
         );
     }

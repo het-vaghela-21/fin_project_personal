@@ -24,6 +24,10 @@ type GroqOptions = {
     maxTokens?: number;
     /** Use only this model instead of the fallback chain (e.g. for image input). */
     model?: string;
+    /** How long gpt-oss models "think" first. Defaults to "low": their reasoning shares the
+     *  completion-token budget, and with a long transaction history "medium" could use
+     *  all of it and return an empty answer. */
+    reasoningEffort?: "low" | "medium" | "high";
 };
 
 export class GroqError extends Error {
@@ -37,6 +41,11 @@ export function isRetryableGroqError(e: unknown): boolean {
     return false;
 }
 
+/** The model returned malformed/empty JSON in JSON mode; another model may well succeed. */
+function isJsonGenerationError(e: unknown): boolean {
+    return e instanceof GroqError && e.status === 400 && /validate JSON|json_validate_failed/i.test(e.message);
+}
+
 async function callGroq(model: string, messages: GroqMessage[], opts: GroqOptions): Promise<string> {
     const res = await fetch(GROQ_API_URL, {
         method: "POST",
@@ -48,10 +57,11 @@ async function callGroq(model: string, messages: GroqMessage[], opts: GroqOption
             model,
             messages,
             temperature: opts.temperature ?? 0.7,
-            max_completion_tokens: opts.maxTokens ?? 2048,
+            max_completion_tokens: opts.maxTokens ?? 4096,
             ...(opts.json ? { response_format: { type: "json_object" } } : {}),
             // Qwen models emit their reasoning inline unless told to hide it.
             ...(model.startsWith("qwen/") ? { reasoning_format: "hidden" } : {}),
+            ...(model.startsWith("openai/gpt-oss") ? { reasoning_effort: opts.reasoningEffort ?? "low" } : {}),
         }),
     });
 
@@ -81,7 +91,7 @@ export async function groqChat(messages: GroqMessage[], opts: GroqOptions = {}, 
         } catch (err) {
             lastError = err;
             console.warn(`[${tag}] Model ${model} failed: ${(err as Error).message.substring(0, 200)}`);
-            if (!isRetryableGroqError(err)) throw err;
+            if (!isRetryableGroqError(err) && !isJsonGenerationError(err)) throw err;
             await new Promise((r) => setTimeout(r, 400));
         }
     }

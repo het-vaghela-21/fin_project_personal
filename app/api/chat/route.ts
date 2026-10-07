@@ -62,8 +62,9 @@ Only reference the above data if the user asks about their own portfolio/spendin
                     reply: "⚠️ All AI models are currently rate-limited. Please wait **a minute** and try again."
                 });
             }
+            console.error("[Chat] failed:", e?.message?.substring(0, 300));
             return NextResponse.json(
-                { error: e?.message?.substring(0, 300) || "An error occurred during AI processing." },
+                { error: "The AI couldn't answer right now. Please try again in a moment." },
                 { status: 500 }
             );
         }
