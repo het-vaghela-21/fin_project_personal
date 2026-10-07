@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Sparkles, Bot, Send, TrendingUp, AlertTriangle, Lightbulb, Wallet, Loader2, Clock, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDashboard } from "@/components/DashboardProvider";
+import { useAuth } from "@/context/AuthContext";
 import ReactMarkdown from "react-markdown";
 import dynamic from "next/dynamic";
 
@@ -52,6 +53,17 @@ function clearInsightsCache() {
 
 export default function AISuggestionsPage() {
     const { transactions, loadingTransactions } = useDashboard();
+    const { user } = useAuth();
+
+    // The AI routes read the signed-in user's own transactions server-side.
+    const aiFetch = async (url: string, body: object) => {
+        const token = await user?.getIdToken();
+        return fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+            body: JSON.stringify(body),
+        });
+    };
     const [message, setMessage] = useState("");
     const [insights, setInsights] = useState<Insight[]>([]);
     const [healthScore, setHealthScore] = useState<number | null>(null);
@@ -82,7 +94,7 @@ export default function AISuggestionsPage() {
         setLoadingInsights(true);
         setInsightError("");
         try {
-            const res = await fetch("/api/ai/insights", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ transactions }) });
+            const res = await aiFetch("/api/ai/insights", {});
             if (!res.ok) {
                 const errData = await res.json();
                 const retryMatch = errData.error?.match(/retry[^0-9]*(\d+(\.\d+)?)\s*s/i);
@@ -116,7 +128,7 @@ export default function AISuggestionsPage() {
         setMessage("");
         setChatLoading(true);
         try {
-            const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: trimMsg, transactions }) });
+            const res = await aiFetch("/api/chat", { message: trimMsg });
             if (!res.ok) throw new Error("Failed to get chat response");
             const data = await res.json();
             setChatHistory(prev => [...prev, { role: "ai", content: data.reply }]);

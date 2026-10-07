@@ -1,7 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { groqChat, isRetryableGroqError } from "@/lib/groq";
+import { verifyAuth } from "@/lib/verifyAuth";
+import { loadAIContext } from "@/lib/aiContext";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+    const uid = await verifyAuth(req);
+    if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     if (!process.env.GROQ_API_KEY) {
         return NextResponse.json(
             { error: "GROQ_API_KEY is not configured in the environment variables." },
@@ -10,15 +15,14 @@ export async function POST(req: Request) {
     }
 
     try {
-        const { message, transactions } = await req.json();
+        const { message } = await req.json();
 
-        if (!message) {
+        if (!message || typeof message !== "string") {
             return NextResponse.json({ error: "Message is required" }, { status: 400 });
         }
 
-        type TxContext = { type: string; amount: number };
-        const totalDebit = transactions?.filter((t: TxContext) => t.type === 'debit').reduce((sum: number, t: TxContext) => sum + t.amount, 0) || 0;
-        const totalCredit = transactions?.filter((t: TxContext) => t.type === 'credit').reduce((sum: number, t: TxContext) => sum + t.amount, 0) || 0;
+        // Always use the caller's own data from the database, never a client-supplied list.
+        const { transactions, totalCredit, totalDebit } = await loadAIContext(uid);
         const netWorth = totalCredit - totalDebit;
 
         const systemInstruction = `You are FinAI, a highly advanced, professional, and strictly bounded Financial Advisor AI.
@@ -37,7 +41,7 @@ USER'S CURRENT FINANCIAL CONTEXT:
 - Current Net Balance: ₹${netWorth.toFixed(2)}
 
 Raw Transaction Data:
-${JSON.stringify(transactions, null, 2)}
+${JSON.stringify(transactions)}
 
 Only reference the above data if the user asks about their own portfolio/spending.`;
 

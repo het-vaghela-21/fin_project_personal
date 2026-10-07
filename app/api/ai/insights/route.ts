@@ -1,7 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { groqChat, GroqError } from "@/lib/groq";
+import { verifyAuth } from "@/lib/verifyAuth";
+import { loadAIContext } from "@/lib/aiContext";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+    const uid = await verifyAuth(req);
+    if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     if (!process.env.GROQ_API_KEY) {
         return NextResponse.json(
             { error: "GROQ_API_KEY is not configured in the environment variables." },
@@ -10,10 +15,10 @@ export async function POST(req: Request) {
     }
 
     try {
-        const { transactions } = await req.json();
-
-        if (!transactions || !Array.isArray(transactions)) {
-            return NextResponse.json({ error: "Invalid transactions array" }, { status: 400 });
+        // Always analyse the caller's own data from the database, never a client-supplied list.
+        const { transactions } = await loadAIContext(uid);
+        if (transactions.length === 0) {
+            return NextResponse.json({ error: "Add some transactions first so the AI has something to analyse." }, { status: 400 });
         }
 
 const systemPrompt = `
@@ -21,7 +26,7 @@ You are a top-tier Financial Advisor AI. Analyze the following user transaction 
 CRITICAL MANDATE: You MUST use the Indian Rupee symbol (₹) for ALL monetary values. DO NOT use the dollar sign ($) under any circumstances.
 
 Transactions:
-${JSON.stringify(transactions, null, 2)}
+${JSON.stringify(transactions)}
 
 You must return your response STRICTLY as a raw JSON object (without markdown wrappers like \`\`\`json) matching this schema exactly:
 {
