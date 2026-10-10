@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectMongo } from "@/lib/mongodb";
 import { Transaction } from "@/models/Transaction";
+import { User } from "@/models/User";
 import { verifyAuth } from "@/lib/verifyAuth";
 import { groqChat } from "@/lib/groq";
 import { CREDIT_CATEGORIES, DEBIT_CATEGORIES, DEBIT_CATEGORY_GUIDE } from "@/lib/categories";
@@ -137,6 +138,15 @@ export async function POST(req: NextRequest) {
     try {
         await connectMongo();
 
+        // SMS capture is tied to one mobile number per account (see /api/users/sms-phone).
+        const owner = await User.findOne({ uid }).select({ smsPhone: 1 }).lean<{ smsPhone?: string }>();
+        if (!owner?.smsPhone) {
+            return NextResponse.json(
+                { error: "Link your mobile number before importing bank SMS.", code: "PHONE_NOT_LINKED" },
+                { status: 403 }
+            );
+        }
+
         // Duplicate = same SMS already imported, or same UPI/UTR reference from any source
         // (e.g. the Gmail UPI sync already captured this payment).
         const hashes = valid.map((t) => t.hash);
@@ -150,8 +160,22 @@ export async function POST(req: NextRequest) {
         const seenHashes = new Set(existing.map((e) => e.smsHash).filter(Boolean));
         const seenRefs = new Set(existing.map((e) => e.upiRef).filter(Boolean));
 
+        // An SMS sits on exactly one person's phone: if another account already imported it,
+        // this account is a second login on that same phone and must not get a copy.
+        // (UPI refs are NOT checked across accounts — payer and payee share the same UTR.)
+        const elsewhere = new Set(
+            (await Transaction.find({ smsHash: { $in: hashes }, userId: { $ne: uid } })
+                .select({ smsHash: 1 })
+                .lean<{ smsHash?: string }[]>()).map((e) => e.smsHash)
+        );
+
         const fresh: IncomingSms[] = [];
+        let otherAccount = 0;
         for (const t of valid) {
+            if (elsewhere.has(t.hash)) {
+                otherAccount++;
+                continue;
+            }
             if (seenHashes.has(t.hash) || (t.upiRef && seenRefs.has(t.upiRef))) continue;
             seenHashes.add(t.hash); // also dedups within this batch
             if (t.upiRef) seenRefs.add(t.upiRef);
@@ -191,7 +215,8 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
             imported: created.length,
-            duplicates: valid.length - fresh.length,
+            duplicates: valid.length - fresh.length - otherAccount,
+            otherAccount,
             invalid,
             transactions: created.map((tx) => ({
                 id: tx._id.toString(),

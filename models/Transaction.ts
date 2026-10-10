@@ -45,6 +45,8 @@ TransactionSchema.index({ userId: 1, date: -1 });
 TransactionSchema.index({ userId: 1, gmailMessageId: 1 }, { sparse: true });
 // Index for fast dedup lookup on smsHash / upiRef (SMS auto-capture)
 TransactionSchema.index({ userId: 1, smsHash: 1 }, { sparse: true });
+// Cross-account lookup: an SMS belongs to exactly one person's phone.
+TransactionSchema.index({ smsHash: 1 }, { sparse: true });
 TransactionSchema.index({ userId: 1, upiRef: 1 }, { sparse: true });
 
 // In dev, hot reload keeps the previously compiled model; rebuild it if its schema is stale

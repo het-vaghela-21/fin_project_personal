@@ -22,6 +22,8 @@ export interface IUser extends Document {
     name: string;
     email: string;
     phone: string;
+    /** Mobile number whose bank SMS this account imports (E.164, e.g. +919876543210). One account per number. */
+    smsPhone?: string;
     provider: "email" | "google";
     role: "user" | "admin";
     encryptedPassword: string;  // AES-256 encrypted — empty for Google users
@@ -54,6 +56,7 @@ const UserSchema = new Schema<IUser>(
         name: { type: String, default: "" },
         email: { type: String, required: true, unique: true, lowercase: true },
         phone: { type: String, default: "" },
+        smsPhone: { type: String, default: undefined },
         provider: { type: String, enum: ["email", "google"], default: "email" },
         role: { type: String, enum: ["user", "admin"], default: "user" },
         encryptedPassword: { type: String, default: "" },
@@ -63,4 +66,12 @@ const UserSchema = new Schema<IUser>(
     { timestamps: true }
 );
 
+// A mobile number can feed bank SMS into only one account.
+UserSchema.index({ smsPhone: 1 }, { unique: true, sparse: true });
+
+// In dev, hot reload keeps the previously compiled model; rebuild it if its schema is stale.
+const cached = models.User;
+if (cached && !cached.schema.path("smsPhone")) {
+    mongoose.deleteModel("User");
+}
 export const User = models.User || model<IUser>("User", UserSchema);
