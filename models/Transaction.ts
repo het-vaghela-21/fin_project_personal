@@ -15,6 +15,7 @@ export interface ITransaction extends Document {
     bankName?: string;        // e.g., "HDFC Bank"
     smsHash?: string;         // hash of the bank SMS (sender + body) — dedup for SMS auto-capture
     accountLast4?: string;    // masked account / card digits from the SMS
+    note?: string;            // user's own note, e.g. "Dinner with college friends"
     createdAt: Date;
     updatedAt: Date;
 }
@@ -35,6 +36,7 @@ const TransactionSchema = new Schema<ITransaction>(
         bankName: { type: String, default: undefined },
         smsHash: { type: String, default: undefined },
         accountLast4: { type: String, default: undefined },
+        note: { type: String, default: undefined, maxlength: 300 },
     },
     { timestamps: true }
 );

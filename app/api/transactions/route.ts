@@ -23,6 +23,8 @@ export async function GET(req: NextRequest) {
             bankName?: string;
             merchant?: string;
             upiRef?: string;
+            accountLast4?: string;
+            note?: string;
         };
         const mapped = transactions.map((t: TransactionContext) => ({
             id: t._id.toString(),
@@ -35,6 +37,8 @@ export async function GET(req: NextRequest) {
             bankName: t.bankName,
             merchant: t.merchant,
             upiRef: t.upiRef,
+            accountLast4: t.accountLast4,
+            note: t.note,
         }));
 
         return NextResponse.json(
