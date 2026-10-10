@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Always use the caller's own data from the database, never a client-supplied list.
-        const { transactions, totalCredit, totalDebit } = await loadAIContext(uid);
+        const { transactions, goals, budgets, totalCredit, totalDebit } = await loadAIContext(uid);
         const netWorth = totalCredit - totalDebit;
 
         const systemInstruction = `You are FinAI, a highly advanced, professional, and strictly bounded Financial Advisor AI.
@@ -40,10 +40,17 @@ USER'S CURRENT FINANCIAL CONTEXT:
 - Total Cash Spent (Debit): ₹${totalDebit.toFixed(2)}
 - Current Net Balance: ₹${netWorth.toFixed(2)}
 
+Savings goals (target, amount saved so far, optional deadline):
+${goals.length ? JSON.stringify(goals) : "none set"}
+
+Monthly budgets (limit vs spent so far this month, today is ${new Date().toISOString().slice(0, 10)}):
+${budgets.length ? JSON.stringify(budgets) : "none set"}
+
 Raw Transaction Data:
 ${JSON.stringify(transactions)}
 
-Only reference the above data if the user asks about their own portfolio/spending.`;
+Only reference the above data if the user asks about their own portfolio, spending, goals or budgets.
+When asked about a goal, estimate how long it will take at their recent monthly savings rate.`;
 
         try {
             const reply = await groqChat(
